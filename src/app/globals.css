@@ -1,2 +1,27 @@
 @import "tailwindcss";
 
+
+/* Base styles */
+:root {
+  --font-mono: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono",
+    "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro",
+    "Fira Mono", "Droid Sans Mono", "Courier New", monospace;
+}
+
+body {
+  @apply bg-white text-black dark:bg-black dark:text-white;
+  font-family: var(--font-lexend-deca), system-ui, sans-serif;
+}
+
+@layer components {
+  /* Color palette button styling */
+  .palette-button {
+    @apply px-8 py-3 rounded-full bg-black text-white dark:bg-white dark:text-black font-medium shadow-sm transition-transform;
+    font-family: var(--font-lexend-deca), system-ui, sans-serif;
+  }
+  
+  /* Color bar styling */
+  .color-bar {
+    @apply relative flex items-center justify-center font-mono text-xl transition-all cursor-pointer;
+  }
+}
