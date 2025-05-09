@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Poppins } from "next/font/google";
 import { Lexend_Deca } from "next/font/google";
@@ -29,6 +29,9 @@ const lexendDeca = Lexend_Deca({
 export const metadata: Metadata = {
   title: "Rangwaala",
   description: "A minimalistic color palette tool",
+};
+
+export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#111111" }
