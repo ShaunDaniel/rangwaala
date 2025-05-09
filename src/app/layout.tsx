@@ -15,14 +15,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Adding Poppins for the logo - heavy weight for bold appearance
 const poppins = Poppins({
   weight: ["700", "800"],
-  subsets: ["latin", "devanagari"],
+  subsets: ["latin"],
   variable: "--font-poppins",
 });
 
-// Adding Lexend Deca for the main typography
 const lexendDeca = Lexend_Deca({
   subsets: ["latin"],
   variable: "--font-lexend-deca",
