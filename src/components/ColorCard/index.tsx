@@ -16,7 +16,7 @@ export default function ColorCard({
   
   return (
     <motion.div
-      className="w-full h-full min-h-[8rem] rounded-xl shadow-lg cursor-pointer overflow-hidden"
+      className="w-full h-full min-h-[8rem] rounded-xl shadow-lg cursor-pointer overflow-hidden flex items-center justify-center"
       style={{ 
         backgroundColor: color,
         color: color.startsWith('#5') || color.startsWith('#6') ? 
@@ -33,29 +33,27 @@ export default function ColorCard({
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
-      <div className="flex items-center justify-center h-full w-full perspective">
-        <motion.div 
-          className="text-center font-mono text-2xl font-medium p-4"
-          initial={{ y: 0 }}
-          animate={{ 
-            y: isHovered ? -8 : 0,
-            scale: isHovered ? 1.1 : 1
-          }}
-        >
-          {isCopied ? (
-            <motion.span
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-3xl font-bold"
-              style={{ fontFamily: "var(--font-lexend-deca)" }}
-            >
-              Copied!
-            </motion.span>
-          ) : (
-            color
-          )}
-        </motion.div>
-      </div>
+      <motion.div 
+        className="text-center font-mono text-base sm:text-xl md:text-2xl font-medium p-2 sm:p-4"
+        initial={{ y: 0 }}
+        animate={{ 
+          y: isHovered ? -6 : 0,
+          scale: isHovered ? 1.1 : 1
+        }}
+      >
+        {isCopied ? (
+          <motion.span
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-xl sm:text-2xl md:text-3xl font-bold"
+            style={{ fontFamily: "var(--font-lexend-deca)" }}
+          >
+            Copied!
+          </motion.span>
+        ) : (
+          color
+        )}
+      </motion.div>
     </motion.div>
   );
 }

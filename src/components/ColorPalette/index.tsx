@@ -39,29 +39,40 @@ export default function ColorPalette() {
   }
 
   return (
-    <div className={`flex min-h-screen relative ${lexendDeca.variable}`}>
+    <div className={`flex flex-col md:flex-row min-h-screen relative ${lexendDeca.variable}`}>
       {/* Background beams (positioned behind content) */}
       <div className="absolute inset-0 -z-10">
         <GradientBackgroundBeams />
       </div>
 
-      {/* Left side - Content and button */}
-      <div className="w-1/2 flex flex-col items-start justify-center p-12 relative z-10">
+      {/* Content section - Full width on mobile, half width on desktop */}
+      <div className="w-full md:w-1/2 flex flex-col items-center md:items-start justify-center p-6 md:p-12 relative z-10">
         <div className="max-w-xl">
-          <h1 className="text-5xl font-bold mb-6" style={{ fontFamily: "var(--font-lexend-deca)" }}>
+          <h1 className="text-3xl md:text-5xl font-bold mb-4 md:mb-6 text-center md:text-left" style={{ fontFamily: "var(--font-lexend-deca)" }}>
             Colors for every mood
           </h1>
-          <p className="text-lg opacity-75 mb-12">Click on any color bar to copy its hex code to your clipboard.</p>
+          <p className="text-base md:text-lg opacity-75 mb-8 md:mb-12 text-center md:text-left">
+            Click on any color bar to copy its hex code to your clipboard.
+          </p>
 
-          <motion.button className="palette-button relative z-10" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={regeneratePalette} style={{ fontFamily: "var(--font-lexend-deca)" }}>
-            Generate New Palette
-          </motion.button>
+          <div className="flex justify-center md:justify-start">
+            <motion.button 
+              className="palette-button relative z-10" 
+              whileHover={{ scale: 1.03 }} 
+              whileTap={{ scale: 0.97 }} 
+              onClick={regeneratePalette} 
+              style={{ fontFamily: "var(--font-lexend-deca)" }}
+            >
+              Generate New Palette
+            </motion.button>
+          </div>
         </div>
       </div>
 
-      <div className="w-1/2 flex flex-col justify-between relative z-20 gap-4 px-4 pt-10 h-screen">
+      {/* Color cards section - Full width on mobile, half width on desktop */}
+      <div className="w-full md:w-1/2 flex flex-col justify-between relative z-20 gap-3 md:gap-4 p-6 md:px-4 md:pt-10 max-h-screen overflow-y-auto">
         {colors.map((color, index) => (
-          <div key={index} className="flex-1">
+          <div key={index} className="flex-1 min-h-[5rem] md:min-h-[8rem]">
             <ColorCard color={color} onClick={() => copyToClipboard(color)} isCopied={copied === color} />
           </div>
         ))}
