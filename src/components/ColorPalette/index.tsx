@@ -13,7 +13,10 @@ const lexendDeca = Lexend_Deca({
 });
 
 export default function ColorPalette() {
-  const [palette, setPalette] = useState({ colors: [], harmony: "" });
+  const [palette, setPalette] = useState<{ colors: string[]; harmony: string }>({ 
+    colors: [], 
+    harmony: "" 
+  });
   const [copied, setCopied] = useState<string | null>(null);
 
   // Generate palette on initial load
