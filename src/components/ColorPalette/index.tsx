@@ -1,13 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
+import { Toaster } from "sonner";
 import { type HarmonyRule } from "@/lib/color/generate";
-import { usePalette } from "@/hooks/usePalette";
+import {
+  usePalette,
+  type PaletteInit,
+  type PaletteSnapshot,
+} from "@/hooks/usePalette";
 import { useHotkeys } from "@/hooks/useHotkeys";
+import { encodePalette } from "@/lib/url";
+import { loadHistory, saveHistory } from "@/lib/history";
 import { GradientBackgroundBeams } from "@/components/ui/GradientBackgroundBeams";
 import { Lexend_Deca } from "next/font/google";
 import ColorCard from "@/components/ColorCard";
+import HarmonySelector from "@/components/HarmonySelector";
+import ExportBar from "@/components/ExportBar";
+import HistoryStrip from "@/components/HistoryStrip";
 
 const lexendDeca = Lexend_Deca({
   subsets: ["latin"],
@@ -24,16 +35,37 @@ const HARMONY_LABELS: Record<HarmonyRule | "image", string> = {
   image: "From image",
 };
 
-export default function ColorPalette() {
-  const { state, dispatch } = usePalette();
+export default function ColorPalette({ initial }: { initial: PaletteInit }) {
+  const { state, dispatch } = usePalette(initial);
   const [copied, setCopied] = useState<string | null>(null);
-  const [ready, setReady] = useState(false);
+  const router = useRouter();
 
-  // Randomize once on mount (SSR renders the deterministic fallback first).
+  const hexes = useMemo(() => state.colors.map((c) => c.hex), [state.colors]);
+
+  // Keep the shareable URL in sync, but don't replace on the initial mount.
+  const encoded = useMemo(
+    () => encodePalette(hexes, state.harmony),
+    [hexes, state.harmony],
+  );
+  const skipFirstUrl = useRef(true);
   useEffect(() => {
-    dispatch({ type: "GENERATE" });
-    setReady(true);
+    if (skipFirstUrl.current) {
+      skipFirstUrl.current = false;
+      return;
+    }
+    router.replace(encoded, { scroll: false });
+  }, [encoded, router]);
+
+  // Load persisted history once, then mirror state.history back to localStorage.
+  const historyLoaded = useRef(false);
+  useEffect(() => {
+    const saved = loadHistory();
+    if (saved.length) dispatch({ type: "SET_HISTORY", history: saved });
+    historyLoaded.current = true;
   }, [dispatch]);
+  useEffect(() => {
+    if (historyLoaded.current) saveHistory(state.history);
+  }, [state.history]);
 
   const regeneratePalette = useCallback(() => dispatch({ type: "GENERATE" }), [dispatch]);
   const toggleLock = useCallback(
@@ -41,6 +73,9 @@ export default function ColorPalette() {
     [dispatch],
   );
   useHotkeys({ onGenerate: regeneratePalette, onToggleLock: toggleLock });
+
+  const restore = (snapshot: PaletteSnapshot) =>
+    dispatch({ type: "RESTORE", snapshot });
 
   const copyToClipboard = (color: string) => {
     navigator.clipboard.writeText(color);
@@ -50,31 +85,31 @@ export default function ColorPalette() {
 
   return (
     <div className={`relative flex min-h-[calc(100vh-4rem)] flex-col ${lexendDeca.variable}`}>
+      <Toaster position="bottom-center" richColors />
+
       {/* Single background effect, breathing with the live palette */}
       <div className="absolute inset-0 -z-10">
-        <GradientBackgroundBeams colors={state.colors.map((c) => c.hex)} />
+        <GradientBackgroundBeams colors={hexes} />
       </div>
 
-      <header className="relative z-10 px-6 pb-6 pt-10 md:px-12 md:pb-8 md:pt-14">
+      <header className="relative z-10 px-6 pb-6 pt-8 md:px-12 md:pb-8 md:pt-10">
+        <div className="mb-3 flex justify-center md:justify-start">
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={state.harmony}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.25 }}
+              className="rounded-full border border-black/15 bg-white/60 px-3 py-1 text-xs font-medium uppercase tracking-wide backdrop-blur-sm dark:border-white/15 dark:bg-black/40"
+            >
+              {HARMONY_LABELS[state.harmony]}
+            </motion.span>
+          </AnimatePresence>
+        </div>
+
         <div className="flex flex-col items-center gap-5 text-center md:flex-row md:items-end md:justify-between md:text-left">
           <div className="max-w-xl">
-            <div
-              className="mb-3 flex justify-center md:justify-start"
-              style={{ opacity: ready ? 1 : 0 }}
-            >
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={state.harmony}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.25 }}
-                  className="rounded-full border border-black/15 bg-white/60 px-3 py-1 text-xs font-medium uppercase tracking-wide backdrop-blur-sm dark:border-white/15 dark:bg-black/40"
-                >
-                  {HARMONY_LABELS[state.harmony]}
-                </motion.span>
-              </AnimatePresence>
-            </div>
             <h1
               className="text-3xl font-bold md:text-5xl"
               style={{ fontFamily: "var(--font-lexend-deca)" }}
@@ -82,23 +117,38 @@ export default function ColorPalette() {
               Colors for every mood
             </h1>
             <p className="mt-3 text-base opacity-75 md:text-lg">
-              Click any swatch to copy its hex code. Press{" "}
+              Click any swatch to copy its hex. Press{" "}
               <kbd className="rounded bg-black/10 px-1.5 py-0.5 text-xs dark:bg-white/15">
                 Space
               </kbd>{" "}
-              to generate.
+              to generate,{" "}
+              <kbd className="rounded bg-black/10 px-1.5 py-0.5 text-xs dark:bg-white/15">
+                1–5
+              </kbd>{" "}
+              to lock.
             </p>
           </div>
 
-          <motion.button
-            className="palette-button relative z-10 shrink-0"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={regeneratePalette}
-            style={{ fontFamily: "var(--font-lexend-deca)" }}
-          >
-            Generate New Palette
-          </motion.button>
+          <div className="flex shrink-0 flex-col items-center gap-3 md:items-end">
+            <HarmonySelector
+              value={state.mode}
+              onChange={(harmony) => dispatch({ type: "SET_HARMONY", harmony })}
+            />
+            <motion.button
+              className="palette-button relative z-10"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={regeneratePalette}
+              style={{ fontFamily: "var(--font-lexend-deca)" }}
+            >
+              Generate New Palette
+            </motion.button>
+          </div>
+        </div>
+
+        <div className="mt-6 flex flex-col items-center gap-4">
+          <ExportBar colors={hexes} />
+          <HistoryStrip history={state.history} onRestore={restore} />
         </div>
       </header>
 
@@ -108,7 +158,9 @@ export default function ColorPalette() {
           <div key={index} className="min-h-[4.5rem] flex-1 md:min-h-0">
             <ColorCard
               color={slot.hex}
+              locked={slot.locked}
               onClick={() => copyToClipboard(slot.hex)}
+              onToggleLock={() => toggleLock(index)}
               isCopied={copied === slot.hex}
             />
           </div>

@@ -43,10 +43,21 @@ export interface PaletteInit {
 }
 
 const FALLBACK_COLORS = ["#a1d2ce", "#78cad2", "#62a8ac", "#5497a7", "#50858b"];
+const MAX_HISTORY = 20;
 
 /** Rebuild the five PaletteColor slots from generated hexes, keeping lock flags. */
 function applyColors(prev: PaletteColor[], hexes: string[]): PaletteColor[] {
   return hexes.map((hex, i) => ({ hex, locked: prev[i]?.locked ?? false }));
+}
+
+/** Prepend the outgoing palette to history, capped at MAX_HISTORY. */
+function pushHistory(state: PaletteState): PaletteSnapshot[] {
+  const snapshot: PaletteSnapshot = {
+    colors: state.colors.map((slot) => slot.hex),
+    harmony: state.harmony,
+    timestamp: Date.now(),
+  };
+  return [snapshot, ...state.history].slice(0, MAX_HISTORY);
 }
 
 function createInitialState(init?: PaletteInit): PaletteState {
@@ -69,7 +80,12 @@ export function paletteReducer(state: PaletteState, action: PaletteAction): Pale
         harmony: state.mode,
         locked: state.colors,
       });
-      return { ...state, colors: applyColors(state.colors, colors), harmony };
+      return {
+        ...state,
+        history: pushHistory(state),
+        colors: applyColors(state.colors, colors),
+        harmony,
+      };
     }
 
     case "SET_HARMONY": {
@@ -79,6 +95,7 @@ export function paletteReducer(state: PaletteState, action: PaletteAction): Pale
       });
       return {
         ...state,
+        history: pushHistory(state),
         mode: action.harmony,
         colors: applyColors(state.colors, colors),
         harmony,
@@ -101,12 +118,13 @@ export function paletteReducer(state: PaletteState, action: PaletteAction): Pale
           ? slot
           : { hex: action.hexes[next++] ?? slot.hex, locked: false },
       );
-      return { ...state, colors, harmony: "image" };
+      return { ...state, history: pushHistory(state), colors, harmony: "image" };
     }
 
     case "RESTORE":
       return {
         ...state,
+        history: pushHistory(state),
         colors: action.snapshot.colors.map((hex) => ({ hex, locked: false })),
         harmony: action.snapshot.harmony,
         mode:
