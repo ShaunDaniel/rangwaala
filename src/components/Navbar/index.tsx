@@ -12,7 +12,7 @@ export default function Navbar() {
         </Link>
 
         <p className="text-xs sm:text-sm">
-          Made with <span className="text-red-500">♥</span> by <a href="https://github.com/shaundaniel" className="underline hover:text-blue-500 transition-colors duration-200">Shaun</a>
+          Made with <span className="text-red-500">♥</span> by <a href="https://shaundaniel.work" className="underline hover:text-blue-500 transition-colors duration-200">Shaun</a>
         </p>
       </div>
     </nav>
