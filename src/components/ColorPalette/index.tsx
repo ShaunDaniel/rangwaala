@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { generatePalette } from "@/utils/colorGenerator";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { generatePalette, type HarmonyRule } from "@/lib/color/generate";
 import { GradientBackgroundBeams } from "@/components/ui/GradientBackgroundBeams";
 import { Lexend_Deca } from "next/font/google";
 import ColorCard from "@/components/ColorCard";
@@ -12,21 +12,28 @@ const lexendDeca = Lexend_Deca({
   variable: "--font-lexend-deca",
 });
 
+const HARMONY_LABELS: Record<HarmonyRule, string> = {
+  analogous: "Analogous",
+  complementary: "Complementary",
+  triadic: "Triadic",
+  tetradic: "Tetradic",
+  splitComplementary: "Split complementary",
+  monochromatic: "Monochromatic",
+};
+
 export default function ColorPalette() {
-  const [palette, setPalette] = useState<{ colors: string[]; harmony: string }>({ 
-    colors: [], 
-    harmony: "" 
+  const [palette, setPalette] = useState<{ colors: string[]; harmony: HarmonyRule | "" }>({
+    colors: [],
+    harmony: "",
   });
   const [copied, setCopied] = useState<string | null>(null);
 
-  // Generate palette on initial load
+  // Generate the first palette on the client to avoid a hydration mismatch.
   useEffect(() => {
     setPalette(generatePalette());
   }, []);
 
-  const regeneratePalette = () => {
-    setPalette(generatePalette());
-  };
+  const regeneratePalette = () => setPalette(generatePalette());
 
   const copyToClipboard = (color: string) => {
     navigator.clipboard.writeText(color);
@@ -34,49 +41,70 @@ export default function ColorPalette() {
     setTimeout(() => setCopied(null), 2000);
   };
 
-  // Use first 4 colors from palette, or a default set if not enough
-  const colors = palette.colors.length >= 4 ? palette.colors.slice(0, 4) : ["#a1d2ce", "#78cad2", "#62a8ac", "#5497a7"];
-
-  if (!colors.length) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (!palette.colors.length) {
+    return (
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
+        Loading…
+      </div>
+    );
   }
 
   return (
-    <div className={`flex flex-col md:flex-row min-h-screen relative ${lexendDeca.variable}`}>
-      {/* Background beams (positioned behind content) */}
+    <div className={`relative flex min-h-[calc(100vh-4rem)] flex-col ${lexendDeca.variable}`}>
+      {/* Single background effect, breathing with the live palette */}
       <div className="absolute inset-0 -z-10">
-        <GradientBackgroundBeams />
+        <GradientBackgroundBeams colors={palette.colors} />
       </div>
 
-      {/* Content section - Full width on mobile, half width on desktop */}
-      <div className="w-full md:w-1/2 flex flex-col items-center md:items-start justify-center p-6 md:p-12 relative z-10">
-        <div className="max-w-xl">
-          <h1 className="text-3xl md:text-5xl font-bold mb-4 md:mb-6 text-center md:text-left" style={{ fontFamily: "var(--font-lexend-deca)" }}>
-            Colors for every mood
-          </h1>
-          <p className="text-base md:text-lg opacity-75 mb-8 md:mb-12 text-center md:text-left">
-            Click on any color bar to copy its hex code to your clipboard.
-          </p>
-
-          <div className="flex justify-center md:justify-start">
-            <motion.button 
-              className="palette-button relative z-10" 
-              whileHover={{ scale: 1.03 }} 
-              whileTap={{ scale: 0.97 }} 
-              onClick={regeneratePalette} 
+      <header className="relative z-10 px-6 pb-6 pt-10 md:px-12 md:pb-8 md:pt-14">
+        <div className="flex flex-col items-center gap-5 text-center md:flex-row md:items-end md:justify-between md:text-left">
+          <div className="max-w-xl">
+            <div className="mb-3 flex justify-center md:justify-start">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={palette.harmony}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.25 }}
+                  className="rounded-full border border-black/15 bg-white/60 px-3 py-1 text-xs font-medium uppercase tracking-wide backdrop-blur-sm dark:border-white/15 dark:bg-black/40"
+                >
+                  {palette.harmony ? HARMONY_LABELS[palette.harmony] : ""}
+                </motion.span>
+              </AnimatePresence>
+            </div>
+            <h1
+              className="text-3xl font-bold md:text-5xl"
               style={{ fontFamily: "var(--font-lexend-deca)" }}
             >
-              Generate New Palette
-            </motion.button>
+              Colors for every mood
+            </h1>
+            <p className="mt-3 text-base opacity-75 md:text-lg">
+              Click any swatch to copy its hex code to your clipboard.
+            </p>
           </div>
-        </div>
-      </div>
 
-      {/* Color cards section - Full width on mobile, half width on desktop */}
-      <div className="w-full md:w-1/2 flex flex-col justify-between relative z-20 gap-3 md:gap-4 p-6 md:px-4 md:pt-10 max-h-screen overflow-y-auto">
-        {colors.map((color, index) => (
-          <div key={index} className="flex-1 min-h-[5rem] md:min-h-[8rem]">
-            <ColorCard color={color} onClick={() => copyToClipboard(color)} isCopied={copied === color} />
+          <motion.button
+            className="palette-button relative z-10 shrink-0"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={regeneratePalette}
+            style={{ fontFamily: "var(--font-lexend-deca)" }}
+          >
+            Generate New Palette
+          </motion.button>
+        </div>
+      </header>
+
+      {/* Full-bleed strip: five equal columns on desktop, stacked rows on mobile */}
+      <div className="relative z-10 flex flex-1 flex-col gap-3 px-4 pb-6 md:flex-row md:gap-0 md:px-0 md:pb-0">
+        {palette.colors.map((color, index) => (
+          <div key={index} className="min-h-[4.5rem] flex-1 md:min-h-0">
+            <ColorCard
+              color={color}
+              onClick={() => copyToClipboard(color)}
+              isCopied={copied === color}
+            />
           </div>
         ))}
       </div>

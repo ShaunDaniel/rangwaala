@@ -1,15 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import { Poppins } from "next/font/google";
 import { Lexend_Deca } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
+// Geist Mono is loaded specifically to render hex codes in monospace.
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -47,7 +43,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${lexendDeca.variable} antialiased`}
+        className={`${geistMono.variable} ${poppins.variable} ${lexendDeca.variable} antialiased`}
       >
         <Navbar />
         <main className="pt-16">{children}</main>

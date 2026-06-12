@@ -4,6 +4,9 @@ import React from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/utils/cn";
 
+// Let the gradient stops ease between palettes instead of snapping on regenerate.
+const STOP_TRANSITION: React.CSSProperties = { transition: "stop-color 0.8s ease" };
+
 export const GradientBackgroundBeams = React.memo(
   ({ className, colors = [] }: { className?: string; colors?: string[] }) => {
     const defaultColors = ["#18CCFC", "#6344F5", "#AE48FF", "#ff8f71", "#f8e169"];
@@ -96,10 +99,19 @@ export const GradientBackgroundBeams = React.memo(
                   delay: Math.random() * 10,
                 }}
               >
-                <stop stopColor={paletteColors[0]} stopOpacity="0"></stop>
-                <stop stopColor={paletteColors[0]}></stop>
-                <stop offset="32.5%" stopColor={paletteColors[Math.min(2, paletteColors.length - 1)]}></stop>
-                <stop offset="100%" stopColor={paletteColors[paletteColors.length - 1]} stopOpacity="0"></stop>
+                <stop stopColor={paletteColors[0]} stopOpacity="0" style={STOP_TRANSITION}></stop>
+                <stop stopColor={paletteColors[0]} style={STOP_TRANSITION}></stop>
+                <stop
+                  offset="32.5%"
+                  stopColor={paletteColors[Math.min(2, paletteColors.length - 1)]}
+                  style={STOP_TRANSITION}
+                ></stop>
+                <stop
+                  offset="100%"
+                  stopColor={paletteColors[paletteColors.length - 1]}
+                  stopOpacity="0"
+                  style={STOP_TRANSITION}
+                ></stop>
               </motion.linearGradient>
             ))}
 
