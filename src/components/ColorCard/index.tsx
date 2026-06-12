@@ -38,9 +38,9 @@ export default function ColorCard({
 
   return (
     <motion.div
-      className="relative flex h-full min-h-[4.5rem] w-full items-center justify-center overflow-hidden rounded-xl shadow-lg md:min-h-0 md:rounded-none md:shadow-none"
+      className="relative flex h-full min-h-[4.5rem] w-full items-center justify-center overflow-hidden md:min-h-0 md:rounded-none md:shadow-none"
       style={{ backgroundColor: color, color: textColor }}
-      whileHover={{ scale: 1.02, rotateX: 5, rotateY: 5, z: 50 }}
+      whileHover={{ scale: 1.02 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
@@ -105,7 +105,7 @@ export default function ColorCard({
         aria-label={`Black text ${onBlack.toFixed(1)} to 1 (${contrastTag(
           onBlack,
         )}), white text ${onWhite.toFixed(1)} to 1 (${contrastTag(onWhite)})`}
-        className="group/badge absolute bottom-2 left-2 z-10 flex items-center gap-1.5 rounded outline-none"
+        className="group/badge absolute bottom-2 left-2 z-10 hidden items-center gap-1.5 rounded outline-none sm:flex"
       >
         <span
           className="text-sm font-bold leading-none"

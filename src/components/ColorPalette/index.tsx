@@ -94,7 +94,7 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
 
   return (
     <MotionConfig reducedMotion="user">
-        <div className="relative flex min-h-[calc(100vh-4rem)] flex-col">
+        <div className="relative flex min-h-[calc(100vh-4.5rem)] flex-col">
         <Toaster position="bottom-center" richColors />
 
         {/* Screen-reader announcements for palette actions */}
@@ -107,7 +107,7 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
           <GradientBackgroundBeams colors={hexes} />
         </div>
 
-        <header className="relative z-10 px-4 pb-3 pt-4 md:px-8 md:pb-4 md:pt-6">
+        <header className="relative z-10 px-3 pb-2 pt-3 sm:px-4 sm:pb-3 sm:pt-4 md:px-8 md:pb-4 md:pt-6">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
               <TextAnimate
@@ -116,21 +116,21 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
                 animation="blurInUp"
                 once
                 startOnView={false}
-                className="font-display text-2xl font-extrabold tracking-tight md:text-3xl"
+                className="font-display text-xl font-extrabold tracking-tight sm:text-2xl md:text-3xl"
               >
                 Colors for every mood
               </TextAnimate>
             </div>
 
             {/* Right: actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <ImageDrop onApply={applyFromImage} />
               <motion.button
                 type="button"
                 onClick={regeneratePalette}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                className="palette-button relative z-10 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black dark:focus-visible:outline-white"
+                className="palette-button relative z-10 px-4 py-2 text-sm sm:px-8 sm:py-3 sm:text-base focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black dark:focus-visible:outline-white"
               >
                 Generate New Palette
               </motion.button>
@@ -139,10 +139,10 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
         </header>
 
         {/* Full-bleed strip: five equal columns on desktop, stacked rows on mobile */}
-        <div className="relative z-10 flex min-h-[65vh] flex-1 flex-col gap-3 overflow-hidden px-4 pb-4 md:flex-row md:gap-0 md:px-0 md:pb-0">
+        <div className="relative z-10 flex min-h-[60vh] flex-1 flex-col overflow-hidden sm:gap-2 sm:px-3 sm:pb-3 md:flex-row md:gap-0 md:px-0 md:pb-0">
           {state.colors.map((slot, index) => (
-            <div key={index} className="min-h-[5rem] flex-1 md:min-h-0">
-              <ClickSpark sparkColor={readableTextColor(slot.hex)} sparkCount={10} sparkRadius={20}>
+            <div key={index} className="flex flex-1 flex-col md:min-h-0">
+              <ClickSpark className="flex flex-1 flex-col" sparkColor={readableTextColor(slot.hex)} sparkCount={10} sparkRadius={20}>
                 <ColorCard
                   color={slot.hex}
                   locked={slot.locked}
@@ -168,7 +168,7 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
         )}
 
         {/* Keyboard shortcut legend */}
-        <footer className="relative z-10 flex items-center justify-center gap-2 py-2 text-xs opacity-70">
+        <footer className="relative z-10 hidden items-center justify-center gap-2 py-2 text-xs opacity-70 sm:flex">
           <kbd className="rounded bg-black/10 px-1.5 py-0.5 dark:bg-white/15">Space</kbd>
           <span>generate</span>
           <span aria-hidden className="opacity-50">·</span>

@@ -119,10 +119,11 @@ export default function ImageDrop({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 rounded-full border border-black/15 bg-white/70 px-3 py-1.5 text-sm font-medium backdrop-blur-sm transition-colors hover:border-black/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-white/15 dark:bg-black/50 dark:hover:border-white/30"
+        className="inline-flex items-center gap-1.5 rounded-full border border-black/15 bg-white/70 px-2.5 py-1.5 text-sm font-medium backdrop-blur-sm transition-colors hover:border-black/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 sm:px-3 dark:border-white/15 dark:bg-black/50 dark:hover:border-white/30"
+        aria-label="Extract palette from image"
       >
         <ImagePlus size={15} />
-        From image
+        <span className="hidden sm:inline">From image</span>
       </button>
 
       {open &&

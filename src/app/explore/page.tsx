@@ -33,7 +33,7 @@ export default function ExplorePage() {
       </header>
 
       {/* Quick-nav: jump to any color family */}
-      <nav className="sticky top-19 z-30 -mx-5 mb-10 border-y border-black/5 bg-white/80 px-5 py-2 backdrop-blur-md md:-mx-8 md:px-8 dark:border-white/10 dark:bg-black/70">
+      <nav className="hidden md:sticky md:top-[4.5rem] md:z-30 md:-mx-8 md:mb-10 md:block md:border-y md:border-black/5 md:bg-white/80 md:px-8 md:py-2 md:backdrop-blur-md dark:md:border-white/10 dark:md:bg-black/70">
         <ul className="flex flex-wrap gap-2 ">
           {FAMILIES.map((family) => (
             <li key={family.name}>

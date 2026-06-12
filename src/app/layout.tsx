@@ -63,7 +63,7 @@ export default function RootLayout({
         className={`${geistMono.variable} ${inter.variable} ${bricolage.variable} ${anek.variable} antialiased`}
       >
         <Navbar />
-        <main className="pt-16">{children}</main>
+        <main className="pt-[4.5rem]">{children}</main>
       </body>
     </html>
   );

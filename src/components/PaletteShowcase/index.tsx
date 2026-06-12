@@ -40,7 +40,7 @@ export default function PaletteShowcase({ colors }: { colors: string[] }) {
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, margin: "-12%" }}
-        className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center gap-12 px-6 py-24 md:px-10"
+        className="mx-auto flex min-h-[80vh] max-w-6xl flex-col justify-center gap-8 px-4 py-16 sm:gap-12 sm:px-6 sm:py-24 md:px-10"
       >
         <motion.p
           variants={item}
@@ -49,7 +49,7 @@ export default function PaletteShowcase({ colors }: { colors: string[] }) {
           Your palette, in the wild
         </motion.p>
 
-        <div className="grid items-center gap-10 md:grid-cols-2 md:gap-14">
+        <div className="grid items-center gap-8 md:grid-cols-2 md:gap-14">
           {/* Copy column */}
           <div>
             <motion.span
@@ -61,7 +61,7 @@ export default function PaletteShowcase({ colors }: { colors: string[] }) {
             </motion.span>
             <motion.h2
               variants={item}
-              className="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight md:text-6xl"
+              className="mt-5 text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-4xl md:text-6xl"
             >
               Design that speaks in color.
             </motion.h2>
@@ -89,7 +89,7 @@ export default function PaletteShowcase({ colors }: { colors: string[] }) {
           {/* Sample card — neutral surface, palette as accents */}
           <motion.div
             variants={item}
-            className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-xl md:p-8 dark:border-neutral-800 dark:bg-neutral-900"
+            className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-xl sm:p-6 md:p-8 dark:border-neutral-800 dark:bg-neutral-900"
           >
             <div className="flex items-center gap-3">
               <div
