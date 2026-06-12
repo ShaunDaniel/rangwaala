@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { generatePalette, type HarmonyRule } from "@/lib/color/generate";
+import { type HarmonyRule } from "@/lib/color/generate";
+import { usePalette } from "@/hooks/usePalette";
+import { useHotkeys } from "@/hooks/useHotkeys";
 import { GradientBackgroundBeams } from "@/components/ui/GradientBackgroundBeams";
 import { Lexend_Deca } from "next/font/google";
 import ColorCard from "@/components/ColorCard";
@@ -12,28 +14,33 @@ const lexendDeca = Lexend_Deca({
   variable: "--font-lexend-deca",
 });
 
-const HARMONY_LABELS: Record<HarmonyRule, string> = {
+const HARMONY_LABELS: Record<HarmonyRule | "image", string> = {
   analogous: "Analogous",
   complementary: "Complementary",
   triadic: "Triadic",
   tetradic: "Tetradic",
   splitComplementary: "Split complementary",
   monochromatic: "Monochromatic",
+  image: "From image",
 };
 
 export default function ColorPalette() {
-  const [palette, setPalette] = useState<{ colors: string[]; harmony: HarmonyRule | "" }>({
-    colors: [],
-    harmony: "",
-  });
+  const { state, dispatch } = usePalette();
   const [copied, setCopied] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
 
-  // Generate the first palette on the client to avoid a hydration mismatch.
+  // Randomize once on mount (SSR renders the deterministic fallback first).
   useEffect(() => {
-    setPalette(generatePalette());
-  }, []);
+    dispatch({ type: "GENERATE" });
+    setReady(true);
+  }, [dispatch]);
 
-  const regeneratePalette = () => setPalette(generatePalette());
+  const regeneratePalette = useCallback(() => dispatch({ type: "GENERATE" }), [dispatch]);
+  const toggleLock = useCallback(
+    (index: number) => dispatch({ type: "TOGGLE_LOCK", index }),
+    [dispatch],
+  );
+  useHotkeys({ onGenerate: regeneratePalette, onToggleLock: toggleLock });
 
   const copyToClipboard = (color: string) => {
     navigator.clipboard.writeText(color);
@@ -41,35 +48,30 @@ export default function ColorPalette() {
     setTimeout(() => setCopied(null), 2000);
   };
 
-  if (!palette.colors.length) {
-    return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
-        Loading…
-      </div>
-    );
-  }
-
   return (
     <div className={`relative flex min-h-[calc(100vh-4rem)] flex-col ${lexendDeca.variable}`}>
       {/* Single background effect, breathing with the live palette */}
       <div className="absolute inset-0 -z-10">
-        <GradientBackgroundBeams colors={palette.colors} />
+        <GradientBackgroundBeams colors={state.colors.map((c) => c.hex)} />
       </div>
 
       <header className="relative z-10 px-6 pb-6 pt-10 md:px-12 md:pb-8 md:pt-14">
         <div className="flex flex-col items-center gap-5 text-center md:flex-row md:items-end md:justify-between md:text-left">
           <div className="max-w-xl">
-            <div className="mb-3 flex justify-center md:justify-start">
+            <div
+              className="mb-3 flex justify-center md:justify-start"
+              style={{ opacity: ready ? 1 : 0 }}
+            >
               <AnimatePresence mode="wait">
                 <motion.span
-                  key={palette.harmony}
+                  key={state.harmony}
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.25 }}
                   className="rounded-full border border-black/15 bg-white/60 px-3 py-1 text-xs font-medium uppercase tracking-wide backdrop-blur-sm dark:border-white/15 dark:bg-black/40"
                 >
-                  {palette.harmony ? HARMONY_LABELS[palette.harmony] : ""}
+                  {HARMONY_LABELS[state.harmony]}
                 </motion.span>
               </AnimatePresence>
             </div>
@@ -80,7 +82,11 @@ export default function ColorPalette() {
               Colors for every mood
             </h1>
             <p className="mt-3 text-base opacity-75 md:text-lg">
-              Click any swatch to copy its hex code to your clipboard.
+              Click any swatch to copy its hex code. Press{" "}
+              <kbd className="rounded bg-black/10 px-1.5 py-0.5 text-xs dark:bg-white/15">
+                Space
+              </kbd>{" "}
+              to generate.
             </p>
           </div>
 
@@ -98,12 +104,12 @@ export default function ColorPalette() {
 
       {/* Full-bleed strip: five equal columns on desktop, stacked rows on mobile */}
       <div className="relative z-10 flex flex-1 flex-col gap-3 px-4 pb-6 md:flex-row md:gap-0 md:px-0 md:pb-0">
-        {palette.colors.map((color, index) => (
+        {state.colors.map((slot, index) => (
           <div key={index} className="min-h-[4.5rem] flex-1 md:min-h-0">
             <ColorCard
-              color={color}
-              onClick={() => copyToClipboard(color)}
-              isCopied={copied === color}
+              color={slot.hex}
+              onClick={() => copyToClipboard(slot.hex)}
+              isCopied={copied === slot.hex}
             />
           </div>
         ))}

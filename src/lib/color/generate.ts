@@ -1,4 +1,4 @@
-import { hslToHex, normalizeHue } from "./convert";
+import { hexToHsl, hslToHex, normalizeHue } from "./convert";
 
 export type HarmonyRule =
   | "analogous"
@@ -89,18 +89,48 @@ function monochromaticColors(baseHue: number): string[] {
   ];
 }
 
+/** A slot the generator may be asked to preserve. */
+export interface LockedSlot {
+  hex: string;
+  locked: boolean;
+}
+
+export interface GenerateOptions {
+  /** A specific rule, or "random"/undefined to pick one. */
+  harmony?: HarmonyRule | "random";
+  /** Current slots; locked hexes are preserved and seed the base hue. */
+  locked?: LockedSlot[];
+}
+
+const pickRandomRule = (): HarmonyRule =>
+  HARMONY_RULES[Math.floor(Math.random() * HARMONY_RULES.length)];
+
 /**
- * Generate a five-color palette from a randomly chosen (or supplied) harmony rule.
+ * Generate a five-color palette.
+ *
+ * When any slots are locked, the base hue is derived from the **first locked
+ * color** (via HEX→HSL) so the harmony relationship holds from what the user
+ * kept; only unlocked slots are overwritten.
  */
-export const generatePalette = (): ColorPalette => {
-  const harmony = HARMONY_RULES[Math.floor(Math.random() * HARMONY_RULES.length)];
-  const baseHue = Math.floor(Math.random() * 360);
+export const generatePalette = (options: GenerateOptions = {}): ColorPalette => {
+  const locked = options.locked ?? [];
+  const harmony: HarmonyRule =
+    !options.harmony || options.harmony === "random" ? pickRandomRule() : options.harmony;
 
-  if (harmony === "monochromatic") {
-    return { harmony, colors: monochromaticColors(baseHue) };
-  }
+  const firstLocked = locked.find((slot) => slot.locked);
+  const baseHue = firstLocked
+    ? Math.round(hexToHsl(firstLocked.hex).h)
+    : Math.floor(Math.random() * 360);
 
-  const hues = harmonyHues(harmony, baseHue) ?? [baseHue, baseHue, baseHue, baseHue, baseHue];
-  const colors = hues.map((hue) => hslToHex(hue, BASE_SATURATION, BASE_LIGHTNESS));
+  const generated =
+    harmony === "monochromatic"
+      ? monochromaticColors(baseHue)
+      : (harmonyHues(harmony, baseHue) ?? [baseHue, baseHue, baseHue, baseHue, baseHue]).map(
+          (hue) => hslToHex(hue, BASE_SATURATION, BASE_LIGHTNESS),
+        );
+
+  // Preserve locked slots in place; fill the rest from the generated set.
+  const colors = generated.map((hex, i) => (locked[i]?.locked ? locked[i].hex : hex));
+
   return { colors, harmony };
 };
