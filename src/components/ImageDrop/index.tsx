@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import { useImagePalette } from "@/hooks/useImagePalette";
 import { readableTextColor } from "@/lib/color/contrast";
@@ -125,109 +126,111 @@ export default function ImageDrop({
         From image
       </button>
 
-      {open && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Extract a palette from an image"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
-          onClick={close}
-        >
+      {open &&
+        createPortal(
           <div
-            className="w-full max-w-md rounded-2xl bg-white p-5 text-black shadow-2xl dark:bg-neutral-900 dark:text-white"
-            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Extract a palette from an image"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+            onClick={close}
           >
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-lexend-deca)" }}>
-                Palette from image
-              </h2>
+            <div
+              className="w-full max-w-md rounded-2xl bg-white p-5 text-black shadow-2xl dark:bg-neutral-900 dark:text-white"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-lexend-deca)" }}>
+                  Palette from image
+                </h2>
+                <button
+                  type="button"
+                  onClick={close}
+                  aria-label="Close"
+                  className="rounded-full p-1.5 hover:bg-black/10 dark:hover:bg-white/10"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
               <button
                 type="button"
-                onClick={close}
-                aria-label="Close"
-                className="rounded-full p-1.5 hover:bg-black/10 dark:hover:bg-white/10"
+                onClick={() => inputRef.current?.click()}
+                onDrop={onDrop}
+                onDragEnter={onDragEnter}
+                onDragLeave={onDragLeave}
+                onDragOver={(e) => e.preventDefault()}
+                className={`flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-8 text-center text-sm transition-colors ${
+                  dragging
+                    ? "border-black/50 bg-black/5 dark:border-white/50 dark:bg-white/5"
+                    : "border-black/20 dark:border-white/20"
+                }`}
               >
-                <X size={18} />
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => inputRef.current?.click()}
-              onDrop={onDrop}
-              onDragEnter={onDragEnter}
-              onDragLeave={onDragLeave}
-              onDragOver={(e) => e.preventDefault()}
-              className={`flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-8 text-center text-sm transition-colors ${
-                dragging
-                  ? "border-black/50 bg-black/5 dark:border-white/50 dark:bg-white/5"
-                  : "border-black/20 dark:border-white/20"
-              }`}
-            >
-              {status === "extracting" ? (
-                <Loader2 className="animate-spin" size={22} />
-              ) : (
-                <ImagePlus size={22} />
-              )}
-              <span className="opacity-80">
-                {status === "extracting"
-                  ? "Reading colors…"
-                  : "Drop, browse, or paste an image"}
-              </span>
-            </button>
-            <input
-              ref={inputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => handleFile(e.target.files?.[0])}
-            />
-
-            {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
-
-            {preview && (
-              <div className="mt-4">
-                <img
-                  src={preview}
-                  alt="Selected upload preview"
-                  className="mx-auto max-h-40 rounded-lg object-contain"
-                />
-                {hexes.length > 0 && (
-                  <div className="mt-3 flex overflow-hidden rounded-lg">
-                    {hexes.map((hex) => (
-                      <div
-                        key={hex}
-                        className="flex h-12 flex-1 items-end justify-center pb-1 text-[10px] font-medium"
-                        style={{
-                          backgroundColor: hex,
-                          color: readableTextColor(hex),
-                          fontFamily: "var(--font-geist-mono), monospace",
-                        }}
-                      >
-                        {hex.toUpperCase()}
-                      </div>
-                    ))}
-                  </div>
+                {status === "extracting" ? (
+                  <Loader2 className="animate-spin" size={22} />
+                ) : (
+                  <ImagePlus size={22} />
                 )}
-              </div>
-            )}
+                <span className="opacity-80">
+                  {status === "extracting"
+                    ? "Reading colors…"
+                    : "Drop, browse, or paste an image"}
+                </span>
+              </button>
+              <input
+                ref={inputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleFile(e.target.files?.[0])}
+              />
 
-            <button
-              type="button"
-              onClick={apply}
-              disabled={hexes.length === 0}
-              className="mt-4 w-full rounded-full bg-black px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40 dark:bg-white dark:text-black"
-              style={{ fontFamily: "var(--font-lexend-deca)" }}
-            >
-              Apply palette
-            </button>
+              {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
 
-            <p className="mt-3 text-center text-xs opacity-60">
-              The image never leaves your browser — only the palette is saved or shared.
-            </p>
-          </div>
-        </div>
-      )}
+              {preview && (
+                <div className="mt-4">
+                  <img
+                    src={preview}
+                    alt="Selected upload preview"
+                    className="mx-auto max-h-40 rounded-lg object-contain"
+                  />
+                  {hexes.length > 0 && (
+                    <div className="mt-3 flex overflow-hidden rounded-lg">
+                      {hexes.map((hex) => (
+                        <div
+                          key={hex}
+                          className="flex h-12 flex-1 items-end justify-center pb-1 text-[10px] font-medium"
+                          style={{
+                            backgroundColor: hex,
+                            color: readableTextColor(hex),
+                            fontFamily: "var(--font-geist-mono), monospace",
+                          }}
+                        >
+                          {hex.toUpperCase()}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={apply}
+                disabled={hexes.length === 0}
+                className="mt-4 w-full rounded-full bg-black px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40 dark:bg-white dark:text-black"
+                style={{ fontFamily: "var(--font-lexend-deca)" }}
+              >
+                Apply palette
+              </button>
+
+              <p className="mt-3 text-center text-xs opacity-60">
+                The image never leaves your browser — only the palette is saved or shared.
+              </p>
+            </div>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

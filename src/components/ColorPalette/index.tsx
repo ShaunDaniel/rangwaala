@@ -161,7 +161,7 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
       </header>
 
       {/* Full-bleed strip: five equal columns on desktop, stacked rows on mobile */}
-      <div className="relative z-10 flex flex-1 flex-col gap-3 px-4 pb-6 md:flex-row md:gap-0 md:px-0 md:pb-0">
+      <div className="relative z-10 flex flex-1 flex-col gap-3 overflow-hidden px-4 pb-6 md:flex-row md:gap-0 md:px-0 md:pb-0">
         {state.colors.map((slot, index) => (
           <div key={index} className="min-h-[4.5rem] flex-1 md:min-h-0">
             <ColorCard
