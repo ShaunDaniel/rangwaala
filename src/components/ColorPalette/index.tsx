@@ -19,6 +19,7 @@ import ColorCard from "@/components/ColorCard";
 import HarmonySelector from "@/components/HarmonySelector";
 import ExportBar from "@/components/ExportBar";
 import HistoryStrip from "@/components/HistoryStrip";
+import ImageDrop from "@/components/ImageDrop";
 
 const lexendDeca = Lexend_Deca({
   subsets: ["latin"],
@@ -134,15 +135,22 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
               value={state.mode}
               onChange={(harmony) => dispatch({ type: "SET_HARMONY", harmony })}
             />
-            <motion.button
-              className="palette-button relative z-10"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={regeneratePalette}
-              style={{ fontFamily: "var(--font-lexend-deca)" }}
-            >
-              Generate New Palette
-            </motion.button>
+            <div className="flex items-center gap-2">
+              <ImageDrop
+                onApply={(extracted) =>
+                  dispatch({ type: "SET_FROM_IMAGE", hexes: extracted })
+                }
+              />
+              <motion.button
+                className="palette-button relative z-10"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={regeneratePalette}
+                style={{ fontFamily: "var(--font-lexend-deca)" }}
+              >
+                Generate New Palette
+              </motion.button>
+            </div>
           </div>
         </div>
 
