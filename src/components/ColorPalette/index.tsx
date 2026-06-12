@@ -13,7 +13,11 @@ import {
 import { useHotkeys } from "@/hooks/useHotkeys";
 import { encodePalette } from "@/lib/url";
 import { loadHistory, saveHistory } from "@/lib/history";
+import { readableTextColor } from "@/lib/color/contrast";
 import { GradientBackgroundBeams } from "@/components/ui/GradientBackgroundBeams";
+import { ShimmerButton } from "@/components/ui/shimmer-button";
+import { TextAnimate } from "@/components/ui/text-animate";
+import ClickSpark from "@/components/ClickSpark";
 import { Lexend_Deca } from "next/font/google";
 import ColorCard from "@/components/ColorCard";
 import HarmonySelector from "@/components/HarmonySelector";
@@ -111,12 +115,17 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
 
         <div className="flex flex-col items-center gap-5 text-center md:flex-row md:items-end md:justify-between md:text-left">
           <div className="max-w-xl">
-            <h1
+            <TextAnimate
+              as="h1"
+              by="character"
+              animation="blurInUp"
+              once
+              startOnView={false}
               className="text-3xl font-bold md:text-5xl"
               style={{ fontFamily: "var(--font-lexend-deca)" }}
             >
               Colors for every mood
-            </h1>
+            </TextAnimate>
             <p className="mt-3 text-base opacity-75 md:text-lg">
               Click any swatch to copy its hex.<br /> Press{" "}
               <kbd className="rounded bg-black/10 px-1.5 py-0.5 text-xs dark:bg-white/15">
@@ -141,15 +150,18 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
                   dispatch({ type: "SET_FROM_IMAGE", hexes: extracted })
                 }
               />
-              <motion.button
-                className="palette-button relative z-10"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
+              <ShimmerButton
                 onClick={regeneratePalette}
-                style={{ fontFamily: "var(--font-lexend-deca)" }}
+                background={hexes[0] ?? "#111111"}
+                shimmerColor={readableTextColor(hexes[0] ?? "#111111")}
+                className="relative z-10 text-sm font-medium"
+                style={{
+                  fontFamily: "var(--font-lexend-deca)",
+                  color: readableTextColor(hexes[0] ?? "#111111"),
+                }}
               >
                 Generate New Palette
-              </motion.button>
+              </ShimmerButton>
             </div>
           </div>
         </div>
@@ -164,13 +176,15 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
       <div className="relative z-10 flex flex-1 flex-col gap-3 overflow-hidden px-4 pb-6 md:flex-row md:gap-0 md:px-0 md:pb-0">
         {state.colors.map((slot, index) => (
           <div key={index} className="min-h-[4.5rem] flex-1 md:min-h-0">
-            <ColorCard
-              color={slot.hex}
-              locked={slot.locked}
-              onClick={() => copyToClipboard(slot.hex)}
-              onToggleLock={() => toggleLock(index)}
-              isCopied={copied === slot.hex}
-            />
+            <ClickSpark sparkColor={readableTextColor(slot.hex)} sparkCount={10} sparkRadius={20}>
+              <ColorCard
+                color={slot.hex}
+                locked={slot.locked}
+                onClick={() => copyToClipboard(slot.hex)}
+                onToggleLock={() => toggleLock(index)}
+                isCopied={copied === slot.hex}
+              />
+            </ClickSpark>
           </div>
         ))}
       </div>

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist_Mono } from "next/font/google";
 import { Poppins } from "next/font/google";
 import { Lexend_Deca } from "next/font/google";
+import { Baloo_2 } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 
@@ -20,6 +21,14 @@ const poppins = Poppins({
 const lexendDeca = Lexend_Deca({
   subsets: ["latin"],
   variable: "--font-lexend-deca",
+});
+
+// Baloo 2 carries both Devanagari and Latin, so the "रंगwaala" wordmark
+// renders in one coherent typeface instead of falling back for the Hindi.
+const baloo = Baloo_2({
+  weight: ["600", "700", "800"],
+  subsets: ["latin", "devanagari"],
+  variable: "--font-baloo",
 });
 
 export const metadata: Metadata = {
@@ -43,7 +52,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistMono.variable} ${poppins.variable} ${lexendDeca.variable} antialiased`}
+        className={`${geistMono.variable} ${poppins.variable} ${lexendDeca.variable} ${baloo.variable} antialiased`}
       >
         <Navbar />
         <main className="pt-16">{children}</main>

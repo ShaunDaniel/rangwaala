@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
 
 /* Base styles */
 :root {
@@ -19,9 +20,33 @@ body {
     @apply px-8 py-3 rounded-full bg-black text-white dark:bg-white dark:text-black font-medium shadow-sm transition-transform;
     font-family: var(--font-lexend-deca), system-ui, sans-serif;
   }
-  
+
   /* Color bar styling */
   .color-bar {
     @apply relative flex items-center justify-center font-mono text-xl transition-all cursor-pointer;
+  }
+}
+
+@theme inline {
+  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
+  --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
+  @keyframes shimmer-slide {
+  to {
+    transform: translate(calc(100cqw - 100%), 0);
+    }
+  }
+  @keyframes spin-around {
+  0% {
+    transform: translateZ(0) rotate(0);
+    }
+  15%, 35% {
+    transform: translateZ(0) rotate(90deg);
+    }
+  65%, 85% {
+    transform: translateZ(0) rotate(270deg);
+    }
+  100% {
+    transform: translateZ(0) rotate(360deg);
+    }
   }
 }

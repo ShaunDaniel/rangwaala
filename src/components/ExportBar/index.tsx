@@ -2,6 +2,7 @@
 
 import { toast } from "sonner";
 import { Braces, Code2, Image as ImageIcon, Palette } from "lucide-react";
+import { FloatingDock } from "@/components/ui/floating-dock";
 import {
   downloadBlob,
   toCss,
@@ -30,27 +31,34 @@ export default function ExportBar({ colors }: { colors: string[] }) {
     }
   };
 
-  const actions = [
-    { label: "CSS", icon: Code2, run: () => copy("CSS variables", toCss(colors)) },
-    { label: "Tailwind", icon: Palette, run: () => copy("Tailwind theme", toTailwind(colors)) },
-    { label: "JSON", icon: Braces, run: () => copy("JSON", toJson(colors)) },
-    { label: "PNG", icon: ImageIcon, run: downloadPng },
+  const items = [
+    {
+      title: "Copy CSS variables",
+      icon: <Code2 className="h-full w-full text-neutral-600 dark:text-neutral-300" />,
+      onClick: () => copy("CSS variables", toCss(colors)),
+    },
+    {
+      title: "Copy Tailwind theme",
+      icon: <Palette className="h-full w-full text-neutral-600 dark:text-neutral-300" />,
+      onClick: () => copy("Tailwind theme", toTailwind(colors)),
+    },
+    {
+      title: "Copy JSON",
+      icon: <Braces className="h-full w-full text-neutral-600 dark:text-neutral-300" />,
+      onClick: () => copy("JSON", toJson(colors)),
+    },
+    {
+      title: "Download PNG",
+      icon: <ImageIcon className="h-full w-full text-neutral-600 dark:text-neutral-300" />,
+      onClick: downloadPng,
+    },
   ];
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-2">
-      {actions.map(({ label, icon: Icon, run }) => (
-        <button
-          key={label}
-          type="button"
-          onClick={run}
-          className="inline-flex items-center gap-1.5 rounded-full border border-black/15 bg-white/70 px-3 py-1.5 text-sm font-medium backdrop-blur-sm transition-colors hover:border-black/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-white/15 dark:bg-black/50 dark:hover:border-white/30"
-          style={{ fontFamily: "var(--font-lexend-deca)" }}
-        >
-          <Icon size={15} />
-          {label}
-        </button>
-      ))}
-    </div>
+    <FloatingDock
+      items={items}
+      desktopClassName="border border-black/10 bg-white/70 backdrop-blur-md dark:border-white/10 dark:bg-neutral-900/70"
+      mobileClassName="fixed bottom-6 right-6 z-40"
+    />
   );
 }

@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { Lock, LockOpen } from "lucide-react";
 import { contrastRatio, readableTextColor } from "@/lib/color/contrast";
+import { BorderBeam } from "@/components/ui/border-beam";
+import { NumberTicker } from "@/components/ui/number-ticker";
 
 function contrastTag(ratio: number): "AAA" | "AA" | "Fail" {
   if (ratio >= 7) return "AAA";
@@ -35,7 +37,6 @@ export default function ColorCard({
       style={{
         backgroundColor: color,
         color: textColor,
-        boxShadow: locked ? `inset 0 0 0 3px ${textColor}` : undefined,
       }}
       whileHover={{ scale: 1.02, rotateX: 5, rotateY: 5, z: 50 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -43,6 +44,17 @@ export default function ColorCard({
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
+      {/* Locked indicator: a beam traces the card's border */}
+      {locked && (
+        <BorderBeam
+          size={90}
+          duration={5}
+          borderWidth={2}
+          colorFrom={textColor}
+          colorTo={`${textColor}00`}
+        />
+      )}
+
       {/* Lock toggle */}
       <button
         type="button"
@@ -60,10 +72,16 @@ export default function ColorCard({
 
       {/* Contrast badge */}
       <span
-        className="absolute bottom-2 left-2 z-10 rounded px-1.5 py-0.5 text-[10px] font-medium tabular-nums"
+        className="absolute bottom-2 left-2 z-10 flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium tabular-nums"
         style={{ color: textColor, opacity: 0.7 }}
       >
-        {ratio.toFixed(2)} {tag}
+        <NumberTicker
+          value={ratio}
+          decimalPlaces={2}
+          className="text-[10px] tracking-normal"
+          style={{ color: textColor }}
+        />
+        {tag}
       </span>
 
       <motion.div
