@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { Toaster } from "sonner";
 import { type HarmonyRule } from "@/lib/color/generate";
 import {
@@ -14,8 +14,7 @@ import { useHotkeys } from "@/hooks/useHotkeys";
 import { encodePalette } from "@/lib/url";
 import { loadHistory, saveHistory } from "@/lib/history";
 import { readableTextColor } from "@/lib/color/contrast";
-import { GradientBackgroundBeams } from "@/components/ui/GradientBackgroundBeams";
-import { ShimmerButton } from "@/components/ui/shimmer-button";
+import dynamic from "next/dynamic";
 import { TextAnimate } from "@/components/ui/text-animate";
 import ClickSpark from "@/components/ClickSpark";
 import { Lexend_Deca } from "next/font/google";
@@ -30,6 +29,16 @@ const lexendDeca = Lexend_Deca({
   variable: "--font-lexend-deca",
 });
 
+// The single background effect is the heaviest animation on the page and is
+// purely decorative, so defer it out of the initial bundle and skip SSR.
+const GradientBackgroundBeams = dynamic(
+  () =>
+    import("@/components/ui/GradientBackgroundBeams").then(
+      (m) => m.GradientBackgroundBeams,
+    ),
+  { ssr: false },
+);
+
 const HARMONY_LABELS: Record<HarmonyRule | "image", string> = {
   analogous: "Analogous",
   complementary: "Complementary",
@@ -43,6 +52,7 @@ const HARMONY_LABELS: Record<HarmonyRule | "image", string> = {
 export default function ColorPalette({ initial }: { initial: PaletteInit }) {
   const { state, dispatch } = usePalette(initial);
   const [copied, setCopied] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState("");
   const router = useRouter();
 
   const hexes = useMemo(() => state.colors.map((c) => c.hex), [state.colors]);
@@ -72,7 +82,10 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
     if (historyLoaded.current) saveHistory(state.history);
   }, [state.history]);
 
-  const regeneratePalette = useCallback(() => dispatch({ type: "GENERATE" }), [dispatch]);
+  const regeneratePalette = useCallback(() => {
+    dispatch({ type: "GENERATE" });
+    setAnnouncement("New palette generated");
+  }, [dispatch]);
   const toggleLock = useCallback(
     (index: number) => dispatch({ type: "TOGGLE_LOCK", index }),
     [dispatch],
@@ -82,15 +95,27 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
   const restore = (snapshot: PaletteSnapshot) =>
     dispatch({ type: "RESTORE", snapshot });
 
+  const applyFromImage = (extracted: string[]) => {
+    dispatch({ type: "SET_FROM_IMAGE", hexes: extracted });
+    setAnnouncement("Palette extracted from image");
+  };
+
   const copyToClipboard = (color: string) => {
     navigator.clipboard.writeText(color);
     setCopied(color);
+    setAnnouncement(`Copied ${color.toUpperCase()}`);
     setTimeout(() => setCopied(null), 2000);
   };
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className={`relative flex min-h-[calc(100vh-4rem)] flex-col ${lexendDeca.variable}`}>
       <Toaster position="bottom-center" richColors />
+
+      {/* Screen-reader announcements for palette actions */}
+      <div className="sr-only" role="status" aria-live="polite">
+        {announcement}
+      </div>
 
       {/* Single background effect, breathing with the live palette */}
       <div className="absolute inset-0 -z-10">
@@ -127,15 +152,8 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
               Colors for every mood
             </TextAnimate>
             <p className="mt-3 text-base opacity-75 md:text-lg">
-              Click any swatch to copy its hex.<br /> Press{" "}
-              <kbd className="rounded bg-black/10 px-1.5 py-0.5 text-xs dark:bg-white/15">
-                Space
-              </kbd>{" "}
-              to generate,{" "}
-              <kbd className="rounded bg-black/10 px-1.5 py-0.5 text-xs dark:bg-white/15">
-                1–5
-              </kbd>{" "}
-              to lock.
+              Click any swatch to copy its hex, lock the ones you love, and
+              generate around them.
             </p>
           </div>
 
@@ -145,23 +163,17 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
               onChange={(harmony) => dispatch({ type: "SET_HARMONY", harmony })}
             />
             <div className="flex items-center gap-2">
-              <ImageDrop
-                onApply={(extracted) =>
-                  dispatch({ type: "SET_FROM_IMAGE", hexes: extracted })
-                }
-              />
-              <ShimmerButton
+              <ImageDrop onApply={applyFromImage} />
+              <motion.button
+                type="button"
                 onClick={regeneratePalette}
-                background={hexes[0] ?? "#111111"}
-                shimmerColor={readableTextColor(hexes[0] ?? "#111111")}
-                className="relative z-10 text-sm font-medium"
-                style={{
-                  fontFamily: "var(--font-lexend-deca)",
-                  color: readableTextColor(hexes[0] ?? "#111111"),
-                }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="palette-button relative z-10 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black dark:focus-visible:outline-white"
+                style={{ fontFamily: "var(--font-lexend-deca)" }}
               >
                 Generate New Palette
-              </ShimmerButton>
+              </motion.button>
             </div>
           </div>
         </div>
@@ -188,6 +200,16 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
           </div>
         ))}
       </div>
+
+      {/* Keyboard shortcut legend */}
+      <footer className="relative z-10 flex items-center justify-center gap-2 py-4 text-xs opacity-70">
+        <kbd className="rounded bg-black/10 px-1.5 py-0.5 dark:bg-white/15">Space</kbd>
+        <span>generate</span>
+        <span aria-hidden className="opacity-50">·</span>
+        <kbd className="rounded bg-black/10 px-1.5 py-0.5 dark:bg-white/15">1–5</kbd>
+        <span>lock</span>
+      </footer>
     </div>
+    </MotionConfig>
   );
 }

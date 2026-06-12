@@ -32,7 +32,13 @@ const baloo = Baloo_2({
 });
 
 export const metadata: Metadata = {
-  title: "Rangwaala",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  ),
+  title: {
+    default: "Rangwaala — color palettes",
+    template: "%s · Rangwaala",
+  },
   description: "A minimalistic color palette tool",
 };
 
