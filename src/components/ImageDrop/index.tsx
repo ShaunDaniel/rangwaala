@@ -160,11 +160,10 @@ export default function ImageDrop({
                 onDragEnter={onDragEnter}
                 onDragLeave={onDragLeave}
                 onDragOver={(e) => e.preventDefault()}
-                className={`flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-8 text-center text-sm transition-colors ${
-                  dragging
-                    ? "border-black/50 bg-black/5 dark:border-white/50 dark:bg-white/5"
-                    : "border-black/20 dark:border-white/20"
-                }`}
+                className={`flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-8 text-center text-sm transition-colors ${dragging
+                  ? "border-black/50 bg-black/5 dark:border-white/50 dark:bg-white/5"
+                  : "border-black/20 dark:border-white/20"
+                  }`}
               >
                 {status === "extracting" ? (
                   <Loader2 className="animate-spin" size={22} />
@@ -225,7 +224,7 @@ export default function ImageDrop({
               </button>
 
               <p className="mt-3 text-center text-xs opacity-60">
-                The image never leaves your browser — only the palette is saved or shared.
+                The image never leaves your browser <br /> only the palette is saved or shared.
               </p>
             </div>
           </div>,

@@ -118,7 +118,7 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
               Colors for every mood
             </h1>
             <p className="mt-3 text-base opacity-75 md:text-lg">
-              Click any swatch to copy its hex. Press{" "}
+              Click any swatch to copy its hex.<br /> Press{" "}
               <kbd className="rounded bg-black/10 px-1.5 py-0.5 text-xs dark:bg-white/15">
                 Space
               </kbd>{" "}
