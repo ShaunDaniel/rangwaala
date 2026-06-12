@@ -15,11 +15,11 @@ export async function generateMetadata({
   // Point OG/Twitter at the route handler with the exact palette, so a shared
   // link unfurls the real colors (a static opengraph-image can't read params).
   const ogQuery = decoded
-    ? encodePalette(decoded.colors, decoded.harmony)
+    ? encodePalette(decoded.colors)
     : "";
   const ogUrl = `/og${ogQuery}`;
   const description = decoded
-    ? `A ${decoded.harmony} palette: ${decoded.colors
+    ? `A color palette: ${decoded.colors
         .map((c) => c.toUpperCase())
         .join(", ")}.`
     : "Generate, lock, and share beautiful color palettes — built around perceptual color and WCAG contrast.";
@@ -53,14 +53,10 @@ export default async function Home({
   // (generated once on the server, so there's no hydration flash).
   let initial: PaletteInit;
   if (decoded) {
-    initial = {
-      colors: decoded.colors,
-      harmony: decoded.harmony,
-      mode: decoded.harmony === "image" ? "random" : decoded.harmony,
-    };
+    initial = { colors: decoded.colors, harmony: decoded.harmony };
   } else {
     const palette = generatePalette();
-    initial = { colors: palette.colors, harmony: palette.harmony, mode: "random" };
+    initial = { colors: palette.colors, harmony: palette.harmony };
   }
 
   return <ColorPalette initial={initial} />;

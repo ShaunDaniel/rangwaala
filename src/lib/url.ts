@@ -4,9 +4,8 @@ import type { PaletteHarmony } from "@/hooks/usePalette";
 /**
  * Shareable-URL codec.
  *
- * Schema: `?c=a1d2ce-50858b-xxxxxx-xxxxxx-xxxxxx&h=triadic`
+ * Schema: `?c=a1d2ce-50858b-xxxxxx-xxxxxx-xxxxxx`
  *  - `c`: five lowercase 6-digit hexes joined by dashes
- *  - `h`: a harmony rule name, or `image`
  */
 
 const HEX_RE = /^[0-9a-f]{6}$/;
@@ -27,10 +26,10 @@ export interface RawSearchParams {
 const firstValue = (v: RawParam): string | null =>
   Array.isArray(v) ? (v[0] ?? null) : (v ?? null);
 
-/** Build the `?c=…&h=…` query string for a palette. */
-export function encodePalette(colors: string[], harmony: PaletteHarmony): string {
+/** Build the `?c=…` query string for a palette. */
+export function encodePalette(colors: string[]): string {
   const c = colors.map((hex) => hex.replace(/^#/, "").toLowerCase()).join("-");
-  return `?c=${c}&h=${harmony}`;
+  return `?c=${c}`;
 }
 
 /**
@@ -39,16 +38,21 @@ export function encodePalette(colors: string[], harmony: PaletteHarmony): string
  */
 export function decodePalette(params: RawSearchParams): DecodedPalette | null {
   const c = firstValue(params.c);
-  const h = firstValue(params.h);
-  if (!c || !h) return null;
+  if (!c) return null;
 
   const parts = c.toLowerCase().split("-");
   if (parts.length !== 5) return null;
   if (!parts.every((part) => HEX_RE.test(part))) return null;
-  if (!VALID_HARMONIES.has(h as PaletteHarmony)) return null;
+
+  // Harmony is optional in the URL (kept for backwards-compat with old links)
+  const h = firstValue(params.h);
+  const harmony: PaletteHarmony =
+    h && VALID_HARMONIES.has(h as PaletteHarmony)
+      ? (h as PaletteHarmony)
+      : "complementary";
 
   return {
     colors: parts.map((part) => `#${part}`),
-    harmony: h as PaletteHarmony,
+    harmony,
   };
 }

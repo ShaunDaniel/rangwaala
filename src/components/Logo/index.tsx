@@ -12,11 +12,11 @@ export default function Logo() {
     <Link
       href="/"
       aria-label="Rangwaala — home"
-      className="group inline-flex items-baseline leading-none tracking-tight"
-      style={{ fontFamily: "var(--font-baloo), sans-serif", fontWeight: 800 }}
+      className="group inline-flex items-baseline overflow-visible leading-none tracking-tight"
+      style={{ fontFamily: "var(--font-anek), sans-serif", fontWeight: 800 }}
     >
       <span
-        className="bg-clip-text text-2xl text-transparent transition-transform duration-300 group-hover:-translate-y-px sm:text-3xl"
+        className="bg-clip-text text-2xl leading-normal text-transparent transition-transform duration-300 group-hover:-translate-y-px sm:text-3xl"
         style={{
           backgroundImage:
             "linear-gradient(105deg,#fb7185 0%,#f59e0b 28%,#10b981 55%,#3b82f6 80%,#8b5cf6 100%)",

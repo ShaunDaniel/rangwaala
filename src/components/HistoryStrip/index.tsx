@@ -13,7 +13,7 @@ export default function HistoryStrip({
   if (history.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-2">
+    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
       <AnimatePresence initial={false}>
         {history.map((snapshot) => (
           <motion.button
@@ -27,7 +27,7 @@ export default function HistoryStrip({
             onClick={() => onRestore(snapshot)}
             aria-label={`Restore palette ${snapshot.colors.join(", ")}`}
             title={snapshot.colors.join(" · ")}
-            className="flex h-8 overflow-hidden rounded-md border border-black/10 shadow-sm transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-white/10"
+            className="flex h-8 shrink-0 overflow-hidden rounded-md border border-black/10 shadow-sm transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-white/10"
           >
             {snapshot.colors.map((hex, i) => (
               <span

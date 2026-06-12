@@ -11,18 +11,33 @@
 
 body {
   @apply bg-white text-black dark:bg-black dark:text-white;
-  font-family: var(--font-lexend-deca), system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+/* Display headings use Bricolage Grotesque with tighter tracking. */
+h1, h2, h3, .font-display {
+  font-family: var(--font-bricolage), system-ui, sans-serif;
+  letter-spacing: -0.02em;
 }
 
 @layer components {
   /* Color palette button styling */
   .palette-button {
     @apply px-8 py-3 rounded-full bg-black text-white dark:bg-white dark:text-black font-medium shadow-sm transition-transform;
-    font-family: var(--font-lexend-deca), system-ui, sans-serif;
+    font-family: var(--font-inter), system-ui, sans-serif;
   }
 
   /* Color bar styling */
   .color-bar {
     @apply relative flex items-center justify-center font-mono text-xl transition-all cursor-pointer;
+  }
+
+  /* Hide scrollbar while keeping scroll functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }

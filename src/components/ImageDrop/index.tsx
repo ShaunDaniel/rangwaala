@@ -120,7 +120,6 @@ export default function ImageDrop({
         type="button"
         onClick={() => setOpen(true)}
         className="inline-flex items-center gap-1.5 rounded-full border border-black/15 bg-white/70 px-3 py-1.5 text-sm font-medium backdrop-blur-sm transition-colors hover:border-black/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-white/15 dark:bg-black/50 dark:hover:border-white/30"
-        style={{ fontFamily: "var(--font-lexend-deca)" }}
       >
         <ImagePlus size={15} />
         From image
@@ -140,7 +139,7 @@ export default function ImageDrop({
               onClick={(e) => e.stopPropagation()}
             >
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-lexend-deca)" }}>
+                <h2 className="text-lg font-bold tracking-tight">
                   Palette from image
                 </h2>
                 <button
@@ -218,7 +217,6 @@ export default function ImageDrop({
                 onClick={apply}
                 disabled={hexes.length === 0}
                 className="mt-4 w-full rounded-full bg-black px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40 dark:bg-white dark:text-black"
-                style={{ fontFamily: "var(--font-lexend-deca)" }}
               >
                 Apply palette
               </button>

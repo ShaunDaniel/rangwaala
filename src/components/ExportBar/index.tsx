@@ -1,8 +1,16 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
-import { Braces, Image as ImageIcon } from "lucide-react";
-import { FloatingDock } from "@/components/ui/floating-dock";
+import { Braces, Copy, Image as ImageIcon, X } from "lucide-react";
+import {
+  downloadBlob,
+  toCss,
+  toJson,
+  toPngBlob,
+  toTailwind,
+} from "@/lib/export";
 
 /** Official Tailwind CSS mark, in brand cyan so it reads at a glance. */
 function TailwindLogo() {
@@ -17,22 +25,41 @@ function TailwindLogo() {
     </svg>
   );
 }
-import {
-  downloadBlob,
-  toCss,
-  toJson,
-  toPngBlob,
-  toTailwind,
-} from "@/lib/export";
 
 export default function ExportBar({ colors }: { colors: string[] }) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close on click outside
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open]);
+
   const copy = async (label: string, text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success(`${label} copied to clipboard`);
+      toast.success(`${label} copied`);
     } catch {
       toast.error("Couldn't copy to clipboard");
     }
+    setOpen(false);
   };
 
   const downloadPng = async () => {
@@ -43,40 +70,101 @@ export default function ExportBar({ colors }: { colors: string[] }) {
     } catch {
       toast.error("Couldn't generate PNG");
     }
+    setOpen(false);
   };
 
   const items = [
     {
-      title: "Copy CSS variables",
+      label: "CSS",
       icon: (
-        <span className="text-[10px] font-bold leading-none tracking-tight text-neutral-600 dark:text-neutral-300">
+        <span className="text-[10px] font-bold leading-none tracking-tight">
           CSS
         </span>
       ),
       onClick: () => copy("CSS variables", toCss(colors)),
     },
     {
-      title: "Copy Tailwind theme",
+      label: "Tailwind",
       icon: <TailwindLogo />,
       onClick: () => copy("Tailwind theme", toTailwind(colors)),
     },
     {
-      title: "Copy JSON",
-      icon: <Braces className="h-full w-full text-neutral-600 dark:text-neutral-300" />,
+      label: "JSON",
+      icon: <Braces className="h-full w-full" />,
       onClick: () => copy("JSON", toJson(colors)),
     },
     {
-      title: "Download PNG",
-      icon: <ImageIcon className="h-full w-full text-neutral-600 dark:text-neutral-300" />,
+      label: "PNG",
+      icon: <ImageIcon className="h-full w-full" />,
       onClick: downloadPng,
     },
   ];
 
   return (
-    <FloatingDock
-      items={items}
-      desktopClassName="border border-black/10 bg-white/70 backdrop-blur-md dark:border-white/10 dark:bg-neutral-900/70"
-      mobileClassName="fixed bottom-6 right-6 z-40"
-    />
+    <div ref={containerRef} className="relative">
+      <AnimatePresence mode="wait">
+        {!open ? (
+          /* Collapsed: single circular button */
+          <motion.button
+            key="trigger"
+            type="button"
+            onClick={() => setOpen(true)}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            aria-label="Copy palette"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-black/80 text-white shadow-lg backdrop-blur-md transition-transform hover:scale-110 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:bg-white/80 dark:text-black"
+          >
+            <Copy size={18} />
+          </motion.button>
+        ) : (
+          /* Expanded: horizontal pill with options */
+          <motion.div
+            key="expanded"
+            initial={{ width: 44, opacity: 0.8, borderRadius: 9999 }}
+            animate={{ width: "auto", opacity: 1, borderRadius: 9999 }}
+            exit={{ width: 44, opacity: 0, borderRadius: 9999 }}
+            transition={{ type: "spring", stiffness: 350, damping: 28 }}
+            className="flex items-center gap-1 overflow-hidden bg-black/80 px-1.5 py-1.5 shadow-lg backdrop-blur-md dark:bg-white/80"
+            style={{ borderRadius: 9999 }}
+          >
+            {items.map((item, i) => (
+              <motion.button
+                key={item.label}
+                type="button"
+                onClick={item.onClick}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.05, type: "spring", stiffness: 400, damping: 22 }}
+                aria-label={item.label}
+                className="group relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-colors hover:bg-white/20 dark:text-black dark:hover:bg-black/20"
+              >
+                <div className="flex h-4 w-4 items-center justify-center">
+                  {item.icon}
+                </div>
+                {/* Tooltip */}
+                <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-black px-2 py-0.5 text-[10px] font-medium text-white opacity-0 shadow transition-opacity group-hover:opacity-100 dark:bg-white dark:text-black">
+                  {item.label}
+                </span>
+              </motion.button>
+            ))}
+
+            {/* Close button */}
+            <motion.button
+              type="button"
+              onClick={() => setOpen(false)}
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: items.length * 0.05, type: "spring", stiffness: 400, damping: 22 }}
+              aria-label="Close export options"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/20 hover:text-white dark:text-black/60 dark:hover:bg-black/20 dark:hover:text-black"
+            >
+              <X size={14} />
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

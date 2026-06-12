@@ -23,15 +23,12 @@ export interface PaletteState {
   colors: PaletteColor[];
   /** The harmony actually applied to the current palette (or "image"). */
   harmony: PaletteHarmony;
-  /** The selector preference used by GENERATE ("random" re-picks each time). */
-  mode: HarmonyRule | "random";
   history: PaletteSnapshot[];
 }
 
 export type PaletteAction =
   | { type: "GENERATE" }
   | { type: "TOGGLE_LOCK"; index: number }
-  | { type: "SET_HARMONY"; harmony: HarmonyRule | "random" }
   | { type: "RESTORE"; snapshot: PaletteSnapshot }
   | { type: "SET_FROM_IMAGE"; hexes: string[] }
   | { type: "SET_HISTORY"; history: PaletteSnapshot[] };
@@ -39,7 +36,6 @@ export type PaletteAction =
 export interface PaletteInit {
   colors: string[];
   harmony: PaletteHarmony;
-  mode?: HarmonyRule | "random";
 }
 
 const FALLBACK_COLORS = ["#a1d2ce", "#78cad2", "#62a8ac", "#5497a7", "#50858b"];
@@ -63,12 +59,9 @@ function pushHistory(state: PaletteState): PaletteSnapshot[] {
 function createInitialState(init?: PaletteInit): PaletteState {
   const colors = init?.colors?.length === 5 ? init.colors : FALLBACK_COLORS;
   const harmony: PaletteHarmony = init?.harmony ?? "analogous";
-  const mode: HarmonyRule | "random" =
-    init?.mode ?? (harmony === "image" ? "random" : harmony);
   return {
     colors: colors.map((hex) => ({ hex, locked: false })),
     harmony,
-    mode,
     history: [],
   };
 }
@@ -76,27 +69,15 @@ function createInitialState(init?: PaletteInit): PaletteState {
 export function paletteReducer(state: PaletteState, action: PaletteAction): PaletteState {
   switch (action.type) {
     case "GENERATE": {
+      // Always pick a fresh scheme so every press yields a new palette — even
+      // when a locked color pins the base hue.
       const { colors, harmony } = generatePalette({
-        harmony: state.mode,
+        harmony: "random",
         locked: state.colors,
       });
       return {
         ...state,
         history: pushHistory(state),
-        colors: applyColors(state.colors, colors),
-        harmony,
-      };
-    }
-
-    case "SET_HARMONY": {
-      const { colors, harmony } = generatePalette({
-        harmony: action.harmony,
-        locked: state.colors,
-      });
-      return {
-        ...state,
-        history: pushHistory(state),
-        mode: action.harmony,
         colors: applyColors(state.colors, colors),
         harmony,
       };
@@ -127,8 +108,6 @@ export function paletteReducer(state: PaletteState, action: PaletteAction): Pale
         history: pushHistory(state),
         colors: action.snapshot.colors.map((hex) => ({ hex, locked: false })),
         harmony: action.snapshot.harmony,
-        mode:
-          action.snapshot.harmony === "image" ? state.mode : action.snapshot.harmony,
       };
 
     case "SET_HISTORY":

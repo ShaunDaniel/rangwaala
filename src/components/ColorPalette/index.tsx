@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, MotionConfig, motion } from "framer-motion";
+import { MotionConfig, motion } from "framer-motion";
 import { Toaster } from "sonner";
-import { type HarmonyRule } from "@/lib/color/generate";
 import {
   usePalette,
   type PaletteInit,
@@ -17,17 +16,11 @@ import { readableTextColor } from "@/lib/color/contrast";
 import dynamic from "next/dynamic";
 import { TextAnimate } from "@/components/ui/text-animate";
 import ClickSpark from "@/components/ClickSpark";
-import { Lexend_Deca } from "next/font/google";
 import ColorCard from "@/components/ColorCard";
-import HarmonySelector from "@/components/HarmonySelector";
 import ExportBar from "@/components/ExportBar";
+import PaletteShowcase from "@/components/PaletteShowcase";
 import HistoryStrip from "@/components/HistoryStrip";
 import ImageDrop from "@/components/ImageDrop";
-
-const lexendDeca = Lexend_Deca({
-  subsets: ["latin"],
-  variable: "--font-lexend-deca",
-});
 
 // The single background effect is the heaviest animation on the page and is
 // purely decorative, so defer it out of the initial bundle and skip SSR.
@@ -39,15 +32,7 @@ const GradientBackgroundBeams = dynamic(
   { ssr: false },
 );
 
-const HARMONY_LABELS: Record<HarmonyRule | "image", string> = {
-  analogous: "Analogous",
-  complementary: "Complementary",
-  triadic: "Triadic",
-  tetradic: "Tetradic",
-  splitComplementary: "Split complementary",
-  monochromatic: "Monochromatic",
-  image: "From image",
-};
+
 
 export default function ColorPalette({ initial }: { initial: PaletteInit }) {
   const { state, dispatch } = usePalette(initial);
@@ -59,8 +44,8 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
 
   // Keep the shareable URL in sync, but don't replace on the initial mount.
   const encoded = useMemo(
-    () => encodePalette(hexes, state.harmony),
-    [hexes, state.harmony],
+    () => encodePalette(hexes),
+    [hexes],
   );
   const skipFirstUrl = useRef(true);
   useEffect(() => {
@@ -109,60 +94,36 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
 
   return (
     <MotionConfig reducedMotion="user">
-    <div className={`relative flex min-h-[calc(100vh-4rem)] flex-col ${lexendDeca.variable}`}>
-      <Toaster position="bottom-center" richColors />
+        <div className="relative flex min-h-[calc(100vh-4rem)] flex-col">
+        <Toaster position="bottom-center" richColors />
 
-      {/* Screen-reader announcements for palette actions */}
-      <div className="sr-only" role="status" aria-live="polite">
-        {announcement}
-      </div>
-
-      {/* Single background effect, breathing with the live palette */}
-      <div className="absolute inset-0 -z-10">
-        <GradientBackgroundBeams colors={hexes} />
-      </div>
-
-      <header className="relative z-10 px-6 pb-6 pt-8 md:px-12 md:pb-8 md:pt-10">
-        <div className="mb-3 flex justify-center md:justify-start">
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={state.harmony}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.25 }}
-              className="rounded-full border border-black/15 bg-white/60 px-3 py-1 text-xs font-medium uppercase tracking-wide backdrop-blur-sm dark:border-white/15 dark:bg-black/40"
-            >
-              {HARMONY_LABELS[state.harmony]}
-            </motion.span>
-          </AnimatePresence>
+        {/* Screen-reader announcements for palette actions */}
+        <div className="sr-only" role="status" aria-live="polite">
+          {announcement}
         </div>
 
-        <div className="flex flex-col items-center gap-5 text-center md:flex-row md:items-end md:justify-between md:text-left">
-          <div className="max-w-xl">
-            <TextAnimate
-              as="h1"
-              by="character"
-              animation="blurInUp"
-              once
-              startOnView={false}
-              className="text-3xl font-bold md:text-5xl"
-              style={{ fontFamily: "var(--font-lexend-deca)" }}
-            >
-              Colors for every mood
-            </TextAnimate>
-            <p className="mt-3 text-base opacity-75 md:text-lg">
-              Click any swatch to copy its hex, lock the ones you love, and
-              generate around them.
-            </p>
-          </div>
+        {/* Single background effect, breathing with the live palette */}
+        <div className="absolute inset-0 -z-10">
+          <GradientBackgroundBeams colors={hexes} />
+        </div>
 
-          <div className="flex shrink-0 flex-col items-center gap-3 md:items-end">
-            <HarmonySelector
-              value={state.mode}
-              onChange={(harmony) => dispatch({ type: "SET_HARMONY", harmony })}
-            />
-            <div className="flex items-center gap-2">
+        <header className="relative z-10 px-4 pb-3 pt-4 md:px-8 md:pb-4 md:pt-6">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-3">
+              <TextAnimate
+                as="h1"
+                by="character"
+                animation="blurInUp"
+                once
+                startOnView={false}
+                className="font-display text-2xl font-extrabold tracking-tight md:text-3xl"
+              >
+                Colors for every mood
+              </TextAnimate>
+            </div>
+
+            {/* Right: actions */}
+            <div className="flex items-center gap-3">
               <ImageDrop onApply={applyFromImage} />
               <motion.button
                 type="button"
@@ -170,46 +131,53 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 className="palette-button relative z-10 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black dark:focus-visible:outline-white"
-                style={{ fontFamily: "var(--font-lexend-deca)" }}
               >
                 Generate New Palette
               </motion.button>
             </div>
           </div>
+        </header>
+
+        {/* Full-bleed strip: five equal columns on desktop, stacked rows on mobile */}
+        <div className="relative z-10 flex min-h-[65vh] flex-1 flex-col gap-3 overflow-hidden px-4 pb-4 md:flex-row md:gap-0 md:px-0 md:pb-0">
+          {state.colors.map((slot, index) => (
+            <div key={index} className="min-h-[5rem] flex-1 md:min-h-0">
+              <ClickSpark sparkColor={readableTextColor(slot.hex)} sparkCount={10} sparkRadius={20}>
+                <ColorCard
+                  color={slot.hex}
+                  locked={slot.locked}
+                  onClick={() => copyToClipboard(slot.hex)}
+                  onToggleLock={() => toggleLock(index)}
+                  isCopied={copied === slot.hex}
+                />
+              </ClickSpark>
+            </div>
+          ))}
         </div>
 
-        <div className="mt-6 flex flex-col items-center gap-4">
+        {/* Export button — sits at the bottom-center edge of the palette */}
+        <div className="relative z-20 flex justify-center -mt-3">
           <ExportBar colors={hexes} />
-          <HistoryStrip history={state.history} onRestore={restore} />
         </div>
-      </header>
 
-      {/* Full-bleed strip: five equal columns on desktop, stacked rows on mobile */}
-      <div className="relative z-10 flex flex-1 flex-col gap-3 overflow-hidden px-4 pb-6 md:flex-row md:gap-0 md:px-0 md:pb-0">
-        {state.colors.map((slot, index) => (
-          <div key={index} className="min-h-[4.5rem] flex-1 md:min-h-0">
-            <ClickSpark sparkColor={readableTextColor(slot.hex)} sparkCount={10} sparkRadius={20}>
-              <ColorCard
-                color={slot.hex}
-                locked={slot.locked}
-                onClick={() => copyToClipboard(slot.hex)}
-                onToggleLock={() => toggleLock(index)}
-                isCopied={copied === slot.hex}
-              />
-            </ClickSpark>
+        {/* History strip — scrollable, below export */}
+        {state.history.length > 0 && (
+          <div className="relative z-10 px-4 py-2 md:px-8">
+            <HistoryStrip history={state.history} onRestore={restore} />
           </div>
-        ))}
+        )}
+
+        {/* Keyboard shortcut legend */}
+        <footer className="relative z-10 flex items-center justify-center gap-2 py-2 text-xs opacity-70">
+          <kbd className="rounded bg-black/10 px-1.5 py-0.5 dark:bg-white/15">Space</kbd>
+          <span>generate</span>
+          <span aria-hidden className="opacity-50">·</span>
+          <kbd className="rounded bg-black/10 px-1.5 py-0.5 dark:bg-white/15">1–5</kbd>
+          <span>lock</span>
+        </footer>
       </div>
 
-      {/* Keyboard shortcut legend */}
-      <footer className="relative z-10 flex items-center justify-center gap-2 py-4 text-xs opacity-70">
-        <kbd className="rounded bg-black/10 px-1.5 py-0.5 dark:bg-white/15">Space</kbd>
-        <span>generate</span>
-        <span aria-hidden className="opacity-50">·</span>
-        <kbd className="rounded bg-black/10 px-1.5 py-0.5 dark:bg-white/15">1–5</kbd>
-        <span>lock</span>
-      </footer>
-    </div>
+      <PaletteShowcase colors={hexes} />
     </MotionConfig>
   );
 }

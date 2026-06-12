@@ -22,9 +22,24 @@ export interface ColorPalette {
   harmony: HarmonyRule;
 }
 
-// Default saturation and lightness — vivid but balanced.
-const BASE_SATURATION = 70;
-const BASE_LIGHTNESS = 60;
+// Saturation and lightness are randomized per generation within these vivid-
+// but-balanced ranges, and each swatch gets a lightness offset so a palette
+// spans light→dark instead of five flat same-lightness colors. Together with a
+// freshly-picked scheme every generation, this is what keeps results varied —
+// even when a locked color pins the base hue.
+const SATURATION_RANGE: [number, number] = [62, 84];
+const LIGHTNESS_RANGE: [number, number] = [52, 62];
+
+// A gentle light→dark spread across the five positions; jittered per swatch.
+const LIGHTNESS_SPREAD = [16, 8, 0, -9, -18];
+
+const randIn = ([min, max]: [number, number]) =>
+  Math.round(min + Math.random() * (max - min));
+
+const randJitter = (amount: number) =>
+  Math.round((Math.random() * 2 - 1) * amount);
+
+const clampPct = (value: number) => Math.max(6, Math.min(94, value));
 
 /**
  * Compute the five hues for a harmony rule around a base hue.
@@ -79,13 +94,17 @@ function harmonyHues(harmony: HarmonyRule, baseHue: number): number[] | null {
 }
 
 /** The five monochromatic swatches for a base hue: one hue, varied S/L. */
-function monochromaticColors(baseHue: number): string[] {
+function monochromaticColors(
+  baseHue: number,
+  saturation: number,
+  lightness: number,
+): string[] {
   return [
-    hslToHex(baseHue, BASE_SATURATION - 20, BASE_LIGHTNESS + 15),
-    hslToHex(baseHue, BASE_SATURATION - 10, BASE_LIGHTNESS + 5),
-    hslToHex(baseHue, BASE_SATURATION, BASE_LIGHTNESS),
-    hslToHex(baseHue, BASE_SATURATION + 5, BASE_LIGHTNESS - 10),
-    hslToHex(baseHue, BASE_SATURATION + 10, BASE_LIGHTNESS - 20),
+    hslToHex(baseHue, saturation - 20, lightness + 15),
+    hslToHex(baseHue, saturation - 10, lightness + 5),
+    hslToHex(baseHue, saturation, lightness),
+    hslToHex(baseHue, saturation + 5, lightness - 10),
+    hslToHex(baseHue, saturation + 10, lightness - 20),
   ];
 }
 
@@ -100,6 +119,16 @@ export interface GenerateOptions {
   harmony?: HarmonyRule | "random";
   /** Current slots; locked hexes are preserved and seed the base hue. */
   locked?: LockedSlot[];
+  /**
+   * Force the base hue (0–360). A locked color still wins; otherwise this is
+   * used instead of a random hue — handy for generating a specific color
+   * family (e.g. "shades of blue").
+   */
+  baseHue?: number;
+  /** Override the saturation range (default vivid). Lets callers ask for pastels. */
+  saturation?: [number, number];
+  /** Override the lightness centre range (default mid). */
+  lightness?: [number, number];
 }
 
 const pickRandomRule = (): HarmonyRule =>
@@ -120,13 +149,23 @@ export const generatePalette = (options: GenerateOptions = {}): ColorPalette => 
   const firstLocked = locked.find((slot) => slot.locked);
   const baseHue = firstLocked
     ? Math.round(hexToHsl(firstLocked.hex).h)
-    : Math.floor(Math.random() * 360);
+    : options.baseHue !== undefined
+      ? normalizeHue(options.baseHue)
+      : Math.floor(Math.random() * 360);
+
+  const saturation = randIn(options.saturation ?? SATURATION_RANGE);
+  const lightness = randIn(options.lightness ?? LIGHTNESS_RANGE);
 
   const generated =
     harmony === "monochromatic"
-      ? monochromaticColors(baseHue)
+      ? monochromaticColors(baseHue, saturation, lightness)
       : (harmonyHues(harmony, baseHue) ?? [baseHue, baseHue, baseHue, baseHue, baseHue]).map(
-          (hue) => hslToHex(hue, BASE_SATURATION, BASE_LIGHTNESS),
+          (hue, i) =>
+            hslToHex(
+              hue,
+              clampPct(saturation + randJitter(5)),
+              clampPct(lightness + LIGHTNESS_SPREAD[i] + randJitter(4)),
+            ),
         );
 
   // Preserve locked slots in place; fill the rest from the generated set.

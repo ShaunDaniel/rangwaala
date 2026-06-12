@@ -28,9 +28,13 @@ export default function ColorCard({
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const textColor = readableTextColor(color);
-  const ratio = contrastRatio(color, textColor === "#000" ? "#000000" : "#ffffff");
-  const tag = contrastTag(ratio);
   const hex = color.toUpperCase();
+
+  // Which text colors are actually usable on this swatch? (≥ 4.5 = AA pass.)
+  // This is the question a designer is really asking, and it varies per color —
+  // unlike the auto-picked label, which is always readable by construction.
+  const onBlack = contrastRatio(color, "#000000");
+  const onWhite = contrastRatio(color, "#ffffff");
 
   return (
     <motion.div
@@ -71,7 +75,6 @@ export default function ColorCard({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-xl font-bold sm:text-2xl md:text-3xl"
-              style={{ fontFamily: "var(--font-lexend-deca)" }}
             >
               Copied!
             </motion.span>
@@ -93,19 +96,57 @@ export default function ColorCard({
         {locked ? <Lock size={16} /> : <LockOpen size={16} />}
       </button>
 
-      {/* Contrast badge */}
-      <span
-        className="pointer-events-none absolute bottom-2 left-2 z-10 flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium tabular-nums"
-        style={{ color: textColor, opacity: 0.7 }}
+      {/* Text-usability badge: shows whether black / white text works on this
+          swatch. The dimmed "Aa" is the one that fails — legibility you can
+          see. Hover/focus reveals the exact ratios. */}
+      <div
+        tabIndex={0}
+        role="img"
+        aria-label={`Black text ${onBlack.toFixed(1)} to 1 (${contrastTag(
+          onBlack,
+        )}), white text ${onWhite.toFixed(1)} to 1 (${contrastTag(onWhite)})`}
+        className="group/badge absolute bottom-2 left-2 z-10 flex items-center gap-1.5 rounded outline-none"
       >
-        <NumberTicker
-          value={ratio}
-          decimalPlaces={2}
-          className="text-[10px] tracking-normal"
-          style={{ color: textColor }}
-        />
-        {tag}
-      </span>
+        <span
+          className="text-sm font-bold leading-none"
+          style={{ color: "#000000", opacity: onBlack >= 4.5 ? 1 : 0.28 }}
+        >
+          Aa
+        </span>
+        <span
+          className="text-sm font-bold leading-none"
+          style={{ color: "#ffffff", opacity: onWhite >= 4.5 ? 1 : 0.28 }}
+        >
+          Aa
+        </span>
+
+        {/* Tooltip: exact ratios + grades on hover or keyboard focus */}
+        <span
+          className="pointer-events-none absolute bottom-full left-0 mb-1.5 flex w-max flex-col gap-0.5 whitespace-nowrap rounded-md px-2 py-1 text-[10px] font-medium leading-tight opacity-0 shadow-md transition-opacity duration-150 group-hover/badge:opacity-100 group-focus-visible/badge:opacity-100"
+          style={{ backgroundColor: textColor, color }}
+        >
+          <span className="flex items-center gap-1">
+            Black text{" "}
+            <NumberTicker
+              value={onBlack}
+              decimalPlaces={1}
+              className="text-[10px] leading-none tracking-normal"
+              style={{ color }}
+            />
+            :1 · {contrastTag(onBlack)}
+          </span>
+          <span className="flex items-center gap-1">
+            White text{" "}
+            <NumberTicker
+              value={onWhite}
+              decimalPlaces={1}
+              className="text-[10px] leading-none tracking-normal"
+              style={{ color }}
+            />
+            :1 · {contrastTag(onWhite)}
+          </span>
+        </span>
+      </div>
     </motion.div>
   );
 }
