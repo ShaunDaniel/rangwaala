@@ -70,8 +70,18 @@ export default function PaletteShowcase({ colors }: { colors: string[] }) {
               className="mx-auto mt-4 max-w-md text-sm text-neutral-500 sm:mt-5 sm:text-base md:mx-0 md:text-lg dark:text-neutral-400"
             >
               A neutral canvas with your five colors used the way real products
-              use them — as accents on buttons, tags, and charts. Generate until
+              use them, as accents on buttons, tags, and charts. Generate until
               it feels right.
+            </motion.p>
+            <motion.p
+              variants={item}
+              className="mx-auto mt-3 max-w-md text-xs text-neutral-400 sm:text-sm md:mx-0 dark:text-neutral-500"
+            >
+              Press{" "}
+              <kbd className="rounded bg-black/10 px-1.5 py-0.5 font-semibold dark:bg-white/15">
+                Space
+              </kbd>{" "}
+              to change the palette.
             </motion.p>
             <motion.div
               variants={item}
