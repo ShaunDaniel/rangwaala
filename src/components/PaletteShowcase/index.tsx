@@ -1,37 +1,36 @@
 "use client";
 
 import { motion, type Variants } from "framer-motion";
+import { useMemo } from "react";
 import { readableTextColor } from "@/lib/color/contrast";
-import { hexToHsl } from "@/lib/color/convert";
+import { paletteRoles } from "@/lib/color/roles";
 
 /**
  * A full-screen showcase of the live palette applied the way palettes actually
- * get used: a neutral canvas with the colors as accents — buttons, tags, a
- * chart, avatars — plus the palette as a swatch band. Reveals on scroll.
+ * get used: a neutral canvas with the colors as *accents* — buttons, tags, a
+ * chart, avatars — never as body text or invisible fills. Color roles come
+ * from {@link paletteRoles}, which guarantees every accent is legible, so no
+ * "weird" washed-out or unreadable swatches sneak into the mockups.
+ *
+ * Layout is mobile-first: a single readable column on phones that steps up to
+ * a two-column composition on tablets and desktops.
  */
 const container: Variants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } },
 };
 const item: Variants = {
-  hidden: { opacity: 0, y: 26 },
+  hidden: { opacity: 0, y: 24 },
   show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
-// A few preset bar heights so the mini chart reads as data, not noise.
-const BAR_HEIGHTS = [52, 84, 40, 96, 68];
+// Preset bar heights so the mini chart reads as data, not noise.
+const BAR_HEIGHTS = [54, 86, 42, 96, 70];
 
 export default function PaletteShowcase({ colors }: { colors: string[] }) {
-  const palette = [0, 1, 2, 3, 4].map(
-    (i) => colors[i] ?? colors[colors.length - 1] ?? "#111111",
-  );
-
-  // Use the most saturated color as the brand accent; the next as a secondary.
-  const bySaturation = [...palette].sort((a, b) => hexToHsl(b).s - hexToHsl(a).s);
-  const primary = bySaturation[0];
-  const secondary = bySaturation[1];
-  const primaryInk = readableTextColor(primary);
-  const secondaryInk = readableTextColor(secondary);
+  const roles = useMemo(() => paletteRoles(colors), [colors]);
+  const { primary, onPrimary, secondary, onSecondary, soft, onSoft, ramp } =
+    roles;
 
   return (
     <section className="relative w-full overflow-hidden bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-50">
@@ -39,97 +38,110 @@ export default function PaletteShowcase({ colors }: { colors: string[] }) {
         variants={container}
         initial="hidden"
         whileInView="show"
-        viewport={{ once: true, margin: "-12%" }}
-        className="mx-auto flex min-h-[80vh] max-w-6xl flex-col justify-center gap-8 px-4 py-16 sm:gap-12 sm:px-6 sm:py-24 md:px-10"
+        viewport={{ once: true, margin: "-10%" }}
+        className="mx-auto flex min-h-[80vh] max-w-6xl flex-col justify-center gap-10 px-5 py-16 sm:gap-14 sm:px-6 sm:py-24 md:px-10"
       >
         <motion.p
           variants={item}
-          className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-neutral-400"
+          className="text-center text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-neutral-400 sm:text-xs"
         >
           Your palette, in the wild
         </motion.p>
 
-        <div className="grid items-center gap-8 md:grid-cols-2 md:gap-14">
+        <div className="grid items-center gap-10 md:grid-cols-2 md:gap-14">
           {/* Copy column */}
-          <div>
+          <div className="text-center md:text-left">
             <motion.span
               variants={item}
-              className="inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
-              style={{ backgroundColor: primary, color: primaryInk }}
+              className="inline-block rounded-full px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-wide sm:text-xs"
+              style={{ backgroundColor: soft, color: onSoft }}
             >
               Your brand
             </motion.span>
             <motion.h2
               variants={item}
-              className="mt-5 text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-4xl md:text-6xl"
+              className="mt-4 text-3xl font-extrabold leading-[1.05] tracking-tight sm:mt-5 sm:text-4xl md:text-5xl lg:text-6xl"
             >
-              Design that speaks in color.
+              Design that speaks{" "}
+              <span style={{ color: primary }}>in color.</span>
             </motion.h2>
             <motion.p
               variants={item}
-              className="mt-5 max-w-md text-base text-neutral-500 md:text-lg dark:text-neutral-400"
+              className="mx-auto mt-4 max-w-md text-sm text-neutral-500 sm:mt-5 sm:text-base md:mx-0 md:text-lg dark:text-neutral-400"
             >
               A neutral canvas with your five colors used the way real products
               use them — as accents on buttons, tags, and charts. Generate until
               it feels right.
             </motion.p>
-            <motion.div variants={item} className="mt-8 flex flex-wrap items-center gap-3">
-              <span
-                className="rounded-full px-6 py-3 text-sm font-semibold shadow-sm"
-                style={{ backgroundColor: primary, color: primaryInk }}
+            <motion.div
+              variants={item}
+              className="mt-7 flex flex-wrap items-center justify-center gap-3 md:justify-start"
+            >
+              <button
+                type="button"
+                className="rounded-full px-6 py-3 text-sm font-semibold shadow-sm transition-transform hover:scale-[1.03] active:scale-95"
+                style={{ backgroundColor: primary, color: onPrimary }}
               >
                 Get started
-              </span>
-              <span className="rounded-full border border-neutral-300 px-6 py-3 text-sm font-semibold dark:border-neutral-700">
+              </button>
+              <button
+                type="button"
+                className="rounded-full border-2 px-6 py-3 text-sm font-semibold transition-colors"
+                style={{ borderColor: secondary, color: secondary }}
+              >
                 Learn more
-              </span>
+              </button>
             </motion.div>
           </div>
 
-          {/* Sample card — neutral surface, palette as accents */}
+          {/* Sample product card — neutral surface, palette as accents */}
           <motion.div
             variants={item}
-            className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-xl sm:p-6 md:p-8 dark:border-neutral-800 dark:bg-neutral-900"
+            className="mx-auto w-full max-w-sm rounded-3xl border border-neutral-200 bg-white p-5 shadow-xl sm:p-6 md:max-w-none md:p-8 dark:border-neutral-800 dark:bg-neutral-900"
           >
             <div className="flex items-center gap-3">
               <div
-                className="flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold"
-                style={{ backgroundColor: primary, color: primaryInk }}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold"
+                style={{ backgroundColor: primary, color: onPrimary }}
               >
                 Aa
               </div>
-              <div className="flex-1">
-                <div className="h-2.5 w-28 rounded-full bg-neutral-300 dark:bg-neutral-700" />
-                <div className="mt-2 h-2 w-20 rounded-full bg-neutral-200 dark:bg-neutral-800" />
+              <div className="min-w-0 flex-1">
+                <div className="h-2.5 w-28 max-w-full rounded-full bg-neutral-300 dark:bg-neutral-700" />
+                <div className="mt-2 h-2 w-20 max-w-full rounded-full bg-neutral-200 dark:bg-neutral-800" />
               </div>
               <span
-                className="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase"
-                style={{ backgroundColor: secondary, color: secondaryInk }}
+                className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase"
+                style={{ backgroundColor: secondary, color: onSecondary }}
               >
                 New
               </span>
             </div>
 
             {/* Mini chart — every palette color, as data */}
-            <div className="mt-6 flex h-28 items-end gap-2.5">
-              {palette.map((hex, i) => (
+            <div className="mt-6 flex h-28 items-end gap-2 sm:gap-2.5">
+              {ramp.map((hex, i) => (
                 <div
                   key={i}
                   className="flex-1 rounded-t-md"
-                  style={{ backgroundColor: hex, height: `${BAR_HEIGHTS[i]}%` }}
+                  style={{
+                    backgroundColor: hex,
+                    height: `${BAR_HEIGHTS[i % BAR_HEIGHTS.length]}%`,
+                  }}
                 />
               ))}
             </div>
 
-            <div className="mt-6 flex items-center justify-between border-t border-neutral-100 pt-5 dark:border-neutral-800">
-              <span
-                className="rounded-xl px-5 py-2.5 text-sm font-semibold"
-                style={{ backgroundColor: primary, color: primaryInk }}
+            <div className="mt-6 flex items-center justify-between gap-3 border-t border-neutral-100 pt-5 dark:border-neutral-800">
+              <button
+                type="button"
+                className="rounded-xl px-5 py-2.5 text-sm font-semibold transition-transform hover:scale-[1.03] active:scale-95"
+                style={{ backgroundColor: primary, color: onPrimary }}
               >
                 Subscribe
-              </span>
+              </button>
               <div className="flex -space-x-2">
-                {palette.slice(0, 4).map((hex, i) => (
+                {ramp.slice(0, 4).map((hex, i) => (
                   <span
                     key={i}
                     className="h-7 w-7 rounded-full ring-2 ring-white dark:ring-neutral-900"
@@ -141,19 +153,19 @@ export default function PaletteShowcase({ colors }: { colors: string[] }) {
           </motion.div>
         </div>
 
-        {/* Full-width swatch band: the palette itself */}
+        {/* Full-width swatch band: the palette itself, labelled and legible */}
         <motion.div
           variants={item}
-          className="flex h-20 overflow-hidden rounded-2xl shadow-lg md:h-24"
+          className="flex h-20 overflow-hidden rounded-2xl shadow-lg sm:h-24"
         >
-          {palette.map((hex, i) => (
+          {ramp.map((hex, i) => (
             <div
               key={i}
               className="flex flex-1 items-end justify-center pb-2"
               style={{ backgroundColor: hex, color: readableTextColor(hex) }}
             >
               <span
-                className="text-[10px] font-medium md:text-xs"
+                className="text-[9px] font-medium tracking-tight sm:text-xs"
                 style={{ fontFamily: "var(--font-geist-mono), monospace" }}
               >
                 {hex.toUpperCase()}

@@ -107,30 +107,34 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
           <GradientBackgroundBeams colors={hexes} />
         </div>
 
-        <header className="relative z-10 px-3 pb-2 pt-3 sm:px-4 sm:pb-3 sm:pt-4 md:px-8 md:pb-4 md:pt-6">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
+        <header className="relative z-10 px-4 pb-3 pt-5 sm:px-5 sm:pt-6 md:px-8 md:pb-4 md:pt-7">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6">
+            {/* Title block */}
+            <div className="min-w-0">
               <TextAnimate
                 as="h1"
-                by="character"
+                by="word"
                 animation="blurInUp"
                 once
                 startOnView={false}
-                className="font-display text-xl font-extrabold tracking-tight sm:text-2xl md:text-3xl"
+                className="font-display text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-4xl md:text-5xl"
               >
                 Colors for every mood
               </TextAnimate>
+              <p className="mt-2 text-sm text-black/55 sm:text-base dark:text-white/55">
+                Generate, lock, and remix — tap any swatch to copy its hex.
+              </p>
             </div>
 
-            {/* Right: actions */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            {/* Actions: full-width on mobile (Generate fills), natural on desktop */}
+            <div className="flex w-full shrink-0 items-stretch gap-2 sm:gap-3 md:w-auto">
               <ImageDrop onApply={applyFromImage} />
               <motion.button
                 type="button"
                 onClick={regeneratePalette}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                className="palette-button relative z-10 px-4 py-2 text-sm sm:px-8 sm:py-3 sm:text-base focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black dark:focus-visible:outline-white"
+                className="palette-button relative z-10 flex-1 px-4 py-3 text-sm sm:px-8 sm:text-base md:flex-none focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black dark:focus-visible:outline-white"
               >
                 Generate New Palette
               </motion.button>
@@ -138,11 +142,16 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
           </div>
         </header>
 
-        {/* Full-bleed strip: five equal columns on desktop, stacked rows on mobile */}
-        <div className="relative z-10 flex min-h-[60vh] flex-1 flex-col overflow-hidden sm:gap-2 sm:px-3 sm:pb-3 md:flex-row md:gap-0 md:px-0 md:pb-0">
+        {/* Palette strip. Mobile: a stack of rounded color bands with explicit
+            heights, so the columns always fill cleanly (no gappy half-bands).
+            md+: five equal, full-height, full-bleed columns. */}
+        <div className="relative z-10 flex flex-col gap-2 px-3 pb-3 sm:gap-2.5 md:h-[calc(100dvh-13rem)] md:min-h-[24rem] md:flex-row md:gap-0 md:px-0 md:pb-0">
           {state.colors.map((slot, index) => (
-            <div key={index} className="flex flex-1 flex-col md:min-h-0">
-              <ClickSpark className="flex flex-1 flex-col" sparkColor={readableTextColor(slot.hex)} sparkCount={10} sparkRadius={20}>
+            <div
+              key={index}
+              className="relative flex h-[clamp(4.75rem,14vh,7.5rem)] overflow-hidden rounded-2xl shadow-sm md:h-auto md:flex-1 md:rounded-none md:shadow-none"
+            >
+              <ClickSpark className="flex w-full" sparkColor={readableTextColor(slot.hex)} sparkCount={10} sparkRadius={20}>
                 <ColorCard
                   color={slot.hex}
                   locked={slot.locked}

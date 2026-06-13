@@ -90,8 +90,8 @@ export default function ColorCard({
         aria-pressed={locked}
         aria-label={`${locked ? "Unlock" : "Lock"} ${hex}`}
         onClick={onToggleLock}
-        className="absolute right-2 top-2 z-20 rounded-full p-2 transition-opacity hover:bg-current/10 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-        style={{ color: textColor, outlineColor: textColor, opacity: locked || isHovered ? 1 : 0.45 }}
+        className="absolute right-1.5 top-1.5 z-20 rounded-full p-2.5 transition-opacity hover:bg-current/10 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 sm:right-2 sm:top-2"
+        style={{ color: textColor, outlineColor: textColor, opacity: locked || isHovered ? 1 : 0.55 }}
       >
         {locked ? <Lock size={16} /> : <LockOpen size={16} />}
       </button>
@@ -105,7 +105,7 @@ export default function ColorCard({
         aria-label={`Black text ${onBlack.toFixed(1)} to 1 (${contrastTag(
           onBlack,
         )}), white text ${onWhite.toFixed(1)} to 1 (${contrastTag(onWhite)})`}
-        className="group/badge absolute bottom-2 left-2 z-10 hidden items-center gap-1.5 rounded outline-none sm:flex"
+        className="group/badge absolute bottom-1.5 left-2 z-10 flex items-center gap-1.5 rounded outline-none sm:bottom-2"
       >
         <span
           className="text-sm font-bold leading-none"
