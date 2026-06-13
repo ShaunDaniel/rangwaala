@@ -12,7 +12,8 @@ export default function Logo() {
     <Link
       href="/"
       aria-label="Rangwaala — home"
-      className="group inline-flex items-baseline overflow-visible leading-none tracking-tight"
+      draggable={false}
+      className="group relative z-50 inline-flex cursor-pointer select-none items-baseline overflow-visible leading-none tracking-tight"
       style={{ fontFamily: "var(--font-anek), sans-serif", fontWeight: 800 }}
     >
       <span

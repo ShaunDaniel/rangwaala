@@ -1,10 +1,10 @@
 /// <reference lib="webworker" />
-import { extractPalette } from "../lib/color/extract";
+import { extractSwatches, type Swatch } from "../lib/color/extract";
 
 export interface ExtractRequest {
   file: File;
 }
-export type ExtractResponse = { hexes: string[] } | { error: string };
+export type ExtractResponse = { swatches: Swatch[] } | { error: string };
 
 const ctx = self as unknown as DedicatedWorkerGlobalScope;
 
@@ -20,8 +20,8 @@ ctx.onmessage = async (event: MessageEvent<ExtractRequest>) => {
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     bitmap.close();
 
-    const hexes = extractPalette(imageData);
-    ctx.postMessage({ hexes } satisfies ExtractResponse);
+    const swatches = extractSwatches(imageData);
+    ctx.postMessage({ swatches } satisfies ExtractResponse);
   } catch (err) {
     ctx.postMessage({ error: (err as Error).message } satisfies ExtractResponse);
   }

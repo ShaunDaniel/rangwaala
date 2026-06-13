@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { extractPalette } from "@/lib/color/extract";
+import { extractSwatches, type Swatch } from "@/lib/color/extract";
 import type { ExtractResponse } from "@/workers/palette.worker";
 
 export type ExtractStatus = "idle" | "extracting" | "error";
 
 /** Decode + extract on the main thread (fallback when the worker is unavailable). */
-async function extractOnMainThread(file: File): Promise<string[]> {
+async function extractOnMainThread(file: File): Promise<Swatch[]> {
   const bitmap = await createImageBitmap(file, { resizeWidth: 128 });
   const canvas = document.createElement("canvas");
   canvas.width = bitmap.width;
@@ -17,11 +17,11 @@ async function extractOnMainThread(file: File): Promise<string[]> {
   ctx.drawImage(bitmap, 0, 0);
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   bitmap.close();
-  return extractPalette(imageData);
+  return extractSwatches(imageData);
 }
 
 /** Run one extraction through the worker, resolving on its reply. */
-function extractViaWorker(worker: Worker, file: File): Promise<string[]> {
+function extractViaWorker(worker: Worker, file: File): Promise<Swatch[]> {
   return new Promise((resolve, reject) => {
     const cleanup = () => {
       worker.removeEventListener("message", onMessage);
@@ -30,7 +30,7 @@ function extractViaWorker(worker: Worker, file: File): Promise<string[]> {
     const onMessage = (event: MessageEvent<ExtractResponse>) => {
       cleanup();
       if ("error" in event.data) reject(new Error(event.data.error));
-      else resolve(event.data.hexes);
+      else resolve(event.data.swatches);
     };
     const onError = (event: ErrorEvent) => {
       cleanup();
@@ -65,22 +65,22 @@ export function useImagePalette() {
     };
   }, []);
 
-  const extract = useCallback(async (file: File): Promise<string[]> => {
+  const extract = useCallback(async (file: File): Promise<Swatch[]> => {
     setStatus("extracting");
     try {
       const worker = workerRef.current;
-      let hexes: string[];
+      let swatches: Swatch[];
       if (worker) {
         try {
-          hexes = await extractViaWorker(worker, file);
+          swatches = await extractViaWorker(worker, file);
         } catch {
-          hexes = await extractOnMainThread(file);
+          swatches = await extractOnMainThread(file);
         }
       } else {
-        hexes = await extractOnMainThread(file);
+        swatches = await extractOnMainThread(file);
       }
       setStatus("idle");
-      return hexes;
+      return swatches;
     } catch (err) {
       setStatus("error");
       throw err;

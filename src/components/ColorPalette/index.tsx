@@ -94,7 +94,7 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
 
   return (
     <MotionConfig reducedMotion="user">
-        <div className="relative flex min-h-[calc(100vh-4.5rem)] flex-col">
+      <div className="relative flex min-h-[calc(100vh-4.5rem)] flex-col">
         <Toaster position="bottom-center" richColors />
 
         {/* Screen-reader announcements for palette actions */}
@@ -145,7 +145,7 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
         {/* Palette strip. Mobile: a stack of rounded color bands with explicit
             heights, so the columns always fill cleanly (no gappy half-bands).
             md+: five equal, full-height, full-bleed columns. */}
-        <div className="relative z-10 flex flex-col gap-2 px-3 pb-3 sm:gap-2.5 md:h-[calc(100dvh-13rem)] md:min-h-[24rem] md:flex-row md:gap-0 md:px-0 md:pb-0">
+        <div className="relative z-10 flex flex-col gap-2 px-3 pb-3 sm:gap-2.5 md:h-[calc(100dvh-12rem)] md:min-h-[24rem] md:flex-row md:gap-0 md:px-0 md:pb-0">
           {state.colors.map((slot, index) => (
             <div
               key={index}
@@ -162,11 +162,12 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
               </ClickSpark>
             </div>
           ))}
-        </div>
 
-        {/* Export button — sits at the bottom-center edge of the palette */}
-        <div className="relative z-20 flex justify-center -mt-3">
-          <ExportBar colors={hexes} />
+          {/* Export / copy palette — pinned to the palette's bottom-right as a
+              toolbar action, so it reads as intentional instead of floating. */}
+          <div className="absolute bottom-3 right-3 z-30 md:bottom-4 md:right-4">
+            <ExportBar colors={hexes} />
+          </div>
         </div>
 
         {/* History strip — scrollable, below export */}
