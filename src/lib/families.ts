@@ -21,18 +21,18 @@ export interface Family {
 // dot looks unmistakably like its name — a flat oklch(L C h) makes warm hues
 // (yellow, orange) read muddy.
 export const FAMILIES: Family[] = [
-  { name: "Red", hue: 25, swatch: "#e5383b" },
-  { name: "Orange", hue: 54, swatch: "#f77f00" },
-  { name: "Yellow", hue: 90, swatch: "#ffce2e" },
-  { name: "Green", hue: 138, swatch: "#5bba32" },
-  { name: "Teal", hue: 183, swatch: "#14b8a6" },
-  { name: "Cyan", hue: 211, swatch: "#22b8cf" },
-  { name: "Blue", hue: 260, swatch: "#3b82f6" },
-  { name: "Violet", hue: 293, swatch: "#7c3aed" },
-  { name: "Purple", hue: 324, swatch: "#a21caf" },
-  { name: "Magenta", hue: 345, swatch: "#d6249f" },
-  { name: "Pink", hue: 7, swatch: "#ff5c8a" },
-  { name: "Lavender", hue: 299, swatch: "#b9a6e0", chromaScale: 0.55 },
+  { name: "red", hue: 25, swatch: "#e5383b" },
+  { name: "orange", hue: 54, swatch: "#f77f00" },
+  { name: "yellow", hue: 90, swatch: "#ffce2e" },
+  { name: "green", hue: 138, swatch: "#5bba32" },
+  { name: "teal", hue: 183, swatch: "#14b8a6" },
+  { name: "cyan", hue: 211, swatch: "#22b8cf" },
+  { name: "blue", hue: 260, swatch: "#3b82f6" },
+  { name: "violet", hue: 293, swatch: "#7c3aed" },
+  { name: "purple", hue: 324, swatch: "#a21caf" },
+  { name: "magenta", hue: 345, swatch: "#d6249f" },
+  { name: "pink", hue: 7, swatch: "#ff5c8a" },
+  { name: "lavender", hue: 299, swatch: "#b9a6e0", chromaScale: 0.55 },
 ];
 
 export const slug = (name: string) => name.toLowerCase();

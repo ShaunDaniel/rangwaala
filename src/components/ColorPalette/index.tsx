@@ -119,10 +119,10 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
                 startOnView={false}
                 className="font-display text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-4xl md:text-5xl"
               >
-                Colors for every mood
+                colors for every mood 🎨
               </TextAnimate>
               <p className="mt-2 text-sm text-black/55 sm:text-base dark:text-white/55">
-                Generate, lock, and remix — tap any swatch to copy its hex.
+                generate, lock, and remix! <br /> tap any swatch to copy its hex.
               </p>
             </div>
 
@@ -136,7 +136,7 @@ export default function ColorPalette({ initial }: { initial: PaletteInit }) {
                 whileTap={{ scale: 0.97 }}
                 className="palette-button relative z-10 flex-1 px-4 py-3 text-sm sm:px-8 sm:text-base md:flex-none focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black dark:focus-visible:outline-white"
               >
-                Generate New Palette
+                generate new palette
               </motion.button>
             </div>
           </div>

@@ -266,7 +266,7 @@ export default function ImageDrop({
         aria-label="Extract palette from image"
       >
         <ImagePlus size={15} />
-        <span className="hidden sm:inline">From image</span>
+        <span className="hidden sm:inline">from image</span>
       </button>
 
       {open &&
@@ -279,14 +279,13 @@ export default function ImageDrop({
             onClick={close}
           >
             <div
-              className={`flex max-h-[92vh] w-full flex-col overflow-hidden rounded-2xl bg-white p-5 text-black shadow-2xl transition-[max-width] duration-300 dark:bg-neutral-900 dark:text-white ${
-                preview ? "max-w-2xl sm:p-6" : "max-w-md"
-              }`}
+              className={`flex max-h-[92vh] w-full flex-col overflow-hidden rounded-2xl bg-white p-5 text-black shadow-2xl transition-[max-width] duration-300 dark:bg-neutral-900 dark:text-white ${preview ? "max-w-2xl sm:p-6" : "max-w-md"
+                }`}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="mb-4 flex shrink-0 items-center justify-between">
                 <h2 className="text-lg font-bold tracking-tight">
-                  Palette from image
+                  palette from image
                 </h2>
                 <button
                   type="button"
@@ -301,157 +300,155 @@ export default function ImageDrop({
               {/* Scrollable body — scrollbar hidden so growing the modal never
                   shows an ugly bar; the footer below stays pinned. */}
               <div className="scrollbar-hide -mx-1 min-h-0 flex-1 overflow-y-auto px-1">
-              {!preview && (
-                <button
-                  type="button"
-                  onClick={() => inputRef.current?.click()}
-                  onDrop={onDrop}
-                  onDragEnter={onDragEnter}
-                  onDragLeave={onDragLeave}
-                  onDragOver={(e) => e.preventDefault()}
-                  className={`flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-8 text-center text-sm transition-colors ${
-                    dragging
+                {!preview && (
+                  <button
+                    type="button"
+                    onClick={() => inputRef.current?.click()}
+                    onDrop={onDrop}
+                    onDragEnter={onDragEnter}
+                    onDragLeave={onDragLeave}
+                    onDragOver={(e) => e.preventDefault()}
+                    className={`flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-8 text-center text-sm transition-colors ${dragging
                       ? "border-black/50 bg-black/5 dark:border-white/50 dark:bg-white/5"
                       : "border-black/20 dark:border-white/20"
-                  }`}
-                >
-                  <ImagePlus size={22} />
-                  <span className="opacity-80">
-                    Drop, browse, or paste an image
-                  </span>
-                </button>
-              )}
-              <input
-                ref={inputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => handleFile(e.target.files?.[0])}
-              />
-
-              {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
-
-              {preview && (
-                <div className="mt-1">
-                  {/* Image + draggable sample points. The wrapper hugs the
-                      image so a point's % position maps to the right pixel. */}
-                  <div
-                    ref={imageBoxRef}
-                    className="relative mx-auto w-fit touch-none select-none"
+                      }`}
                   >
-                    <img
-                      src={preview}
-                      alt="Selected upload preview"
-                      draggable={false}
-                      className="block max-h-[50vh] max-w-full rounded-lg"
-                    />
+                    <ImagePlus size={22} />
+                    <span className="opacity-80">
+                      drop, browse, or paste an image
+                    </span>
+                  </button>
+                )}
+                <input
+                  ref={inputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleFile(e.target.files?.[0])}
+                />
 
-                    {status === "extracting" && (
-                      <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/30 text-white">
-                        <Loader2 className="animate-spin" size={22} />
-                      </div>
-                    )}
+                {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
 
-                    {swatches.map((s, index) => {
-                      const ink = readableTextColor(s.hex);
-                      const active = activePoint === index;
-                      return (
-                        <button
-                          key={index}
-                          type="button"
-                          aria-label={`Sample point ${index + 1}: ${s.hex.toUpperCase()}. Drag to adjust.`}
-                          onPointerDown={(e) => {
-                            e.preventDefault();
-                            e.currentTarget.setPointerCapture(e.pointerId);
-                            draggingPoint.current = index;
-                            setActivePoint(index);
-                            drawLoupe(s.x, s.y);
-                          }}
-                          onPointerMove={(e) => {
-                            if (draggingPoint.current === index) {
-                              movePoint(index, e.clientX, e.clientY);
-                            }
-                          }}
-                          onPointerUp={(e) => {
-                            e.currentTarget.releasePointerCapture(e.pointerId);
-                            draggingPoint.current = null;
-                            setActivePoint(null);
-                          }}
-                          onPointerCancel={() => {
-                            draggingPoint.current = null;
-                            setActivePoint(null);
-                          }}
-                          className="absolute flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none items-center justify-center rounded-full text-[10px] font-bold shadow-[0_1px_4px_rgba(0,0,0,0.4)] ring-2 ring-white transition-transform active:cursor-grabbing dark:ring-neutral-900"
-                          style={{
-                            left: `${s.x * 100}%`,
-                            top: `${s.y * 100}%`,
-                            backgroundColor: s.hex,
-                            color: ink,
-                            zIndex: active ? 20 : 10,
-                            transform: `translate(-50%, -50%) scale(${active ? 1.25 : 1})`,
-                          }}
-                        >
-                          {index + 1}
-                        </button>
-                      );
-                    })}
+                {preview && (
+                  <div className="mt-1">
+                    {/* Image + draggable sample points. The wrapper hugs the
+                      image so a point's % position maps to the right pixel. */}
+                    <div
+                      ref={imageBoxRef}
+                      className="relative mx-auto w-fit touch-none select-none"
+                    >
+                      <img
+                        src={preview}
+                        alt="Selected upload preview"
+                        draggable={false}
+                        className="block max-h-[50vh] max-w-full rounded-lg"
+                      />
 
-                    {/* Magnifier loupe — pixel-zoom of the active point, with a
+                      {status === "extracting" && (
+                        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/30 text-white">
+                          <Loader2 className="animate-spin" size={22} />
+                        </div>
+                      )}
+
+                      {swatches.map((s, index) => {
+                        const ink = readableTextColor(s.hex);
+                        const active = activePoint === index;
+                        return (
+                          <button
+                            key={index}
+                            type="button"
+                            aria-label={`Sample point ${index + 1}: ${s.hex.toUpperCase()}. Drag to adjust.`}
+                            onPointerDown={(e) => {
+                              e.preventDefault();
+                              e.currentTarget.setPointerCapture(e.pointerId);
+                              draggingPoint.current = index;
+                              setActivePoint(index);
+                              drawLoupe(s.x, s.y);
+                            }}
+                            onPointerMove={(e) => {
+                              if (draggingPoint.current === index) {
+                                movePoint(index, e.clientX, e.clientY);
+                              }
+                            }}
+                            onPointerUp={(e) => {
+                              e.currentTarget.releasePointerCapture(e.pointerId);
+                              draggingPoint.current = null;
+                              setActivePoint(null);
+                            }}
+                            onPointerCancel={() => {
+                              draggingPoint.current = null;
+                              setActivePoint(null);
+                            }}
+                            className="absolute flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none items-center justify-center rounded-full text-[10px] font-bold shadow-[0_1px_4px_rgba(0,0,0,0.4)] ring-2 ring-white transition-transform active:cursor-grabbing dark:ring-neutral-900"
+                            style={{
+                              left: `${s.x * 100}%`,
+                              top: `${s.y * 100}%`,
+                              backgroundColor: s.hex,
+                              color: ink,
+                              zIndex: active ? 20 : 10,
+                              transform: `translate(-50%, -50%) scale(${active ? 1.25 : 1})`,
+                            }}
+                          >
+                            {index + 1}
+                          </button>
+                        );
+                      })}
+
+                      {/* Magnifier loupe — pixel-zoom of the active point, with a
                         crosshair on the exact pixel being sampled. Always
                         mounted (so its canvas ref exists) but only shown while
                         a point is being dragged. */}
-                    <div
-                      className={`pointer-events-none absolute top-2 z-30 flex flex-col items-center gap-1 transition-opacity duration-150 ${
-                        loupeOnLeft ? "left-2" : "right-2"
-                      }`}
-                      style={{ opacity: activeSwatch ? 1 : 0 }}
-                    >
-                      <canvas
-                        ref={loupeCanvasRef}
-                        width={LOUPE_SIZE}
-                        height={LOUPE_SIZE}
-                        className="h-28 w-28 rounded-full border-2 border-white bg-neutral-200 shadow-lg ring-1 ring-black/20 dark:border-neutral-800 dark:bg-neutral-700"
-                      />
-                      {activeSwatch && (
-                        <span
-                          className="rounded-md px-2 py-0.5 text-[11px] font-semibold shadow"
-                          style={{
-                            backgroundColor: activeSwatch.hex,
-                            color: readableTextColor(activeSwatch.hex),
-                            fontFamily: "var(--font-geist-mono), monospace",
-                          }}
-                        >
-                          {activeSwatch.hex.toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {swatches.length > 0 && (
-                    <>
-                      <p className="mt-3 text-center text-xs opacity-60">
-                        Drag the numbered points to fine-tune each color.
-                      </p>
-                      {/* Live swatch row, kept in sync with the points */}
-                      <div className="mt-2 flex overflow-hidden rounded-lg">
-                        {swatches.map((s, index) => (
-                          <div
-                            key={index}
-                            className="flex h-12 flex-1 items-end justify-center pb-1 text-[10px] font-medium"
+                      <div
+                        className={`pointer-events-none absolute top-2 z-30 flex flex-col items-center gap-1 transition-opacity duration-150 ${loupeOnLeft ? "left-2" : "right-2"
+                          }`}
+                        style={{ opacity: activeSwatch ? 1 : 0 }}
+                      >
+                        <canvas
+                          ref={loupeCanvasRef}
+                          width={LOUPE_SIZE}
+                          height={LOUPE_SIZE}
+                          className="h-28 w-28 rounded-full border-2 border-white bg-neutral-200 shadow-lg ring-1 ring-black/20 dark:border-neutral-800 dark:bg-neutral-700"
+                        />
+                        {activeSwatch && (
+                          <span
+                            className="rounded-md px-2 py-0.5 text-[11px] font-semibold shadow"
                             style={{
-                              backgroundColor: s.hex,
-                              color: readableTextColor(s.hex),
+                              backgroundColor: activeSwatch.hex,
+                              color: readableTextColor(activeSwatch.hex),
                               fontFamily: "var(--font-geist-mono), monospace",
                             }}
                           >
-                            {s.hex.toUpperCase()}
-                          </div>
-                        ))}
+                            {activeSwatch.hex.toUpperCase()}
+                          </span>
+                        )}
                       </div>
-                    </>
-                  )}
-                </div>
-              )}
+                    </div>
+
+                    {swatches.length > 0 && (
+                      <>
+                        <p className="mt-3 text-center text-xs opacity-60">
+                          drag the numbered points to fine-tune each color.
+                        </p>
+                        {/* Live swatch row, kept in sync with the points */}
+                        <div className="mt-2 flex overflow-hidden rounded-lg">
+                          {swatches.map((s, index) => (
+                            <div
+                              key={index}
+                              className="flex h-12 flex-1 items-end justify-center pb-1 text-[10px] font-medium"
+                              style={{
+                                backgroundColor: s.hex,
+                                color: readableTextColor(s.hex),
+                                fontFamily: "var(--font-geist-mono), monospace",
+                              }}
+                            >
+                              {s.hex.toUpperCase()}
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Pinned footer — always visible, no scrolling needed to apply. */}
@@ -462,7 +459,7 @@ export default function ImageDrop({
                     onClick={() => inputRef.current?.click()}
                     className="mb-2 w-full rounded-full border border-black/15 px-4 py-2 text-sm font-medium transition-colors hover:border-black/40 dark:border-white/15 dark:hover:border-white/40"
                   >
-                    Choose a different image
+                    choose a different image
                   </button>
                 )}
                 <button
@@ -471,10 +468,10 @@ export default function ImageDrop({
                   disabled={swatches.length === 0}
                   className="w-full rounded-full bg-black px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40 dark:bg-white dark:text-black"
                 >
-                  Apply palette
+                  apply palette
                 </button>
                 <p className="mt-3 text-center text-xs opacity-60">
-                  The image never leaves your browser · only the palette is
+                  the image never leaves your browser <br /> only the palette is
                   saved or shared.
                 </p>
               </div>

@@ -76,7 +76,7 @@ export default function FamilyGroup({
                 </div>
                 <div className="flex items-center justify-end px-3 py-2 text-xs">
                   <span className="opacity-50 transition-opacity group-hover:opacity-90">
-                    Open →
+                    open →
                   </span>
                 </div>
               </Link>
@@ -92,7 +92,7 @@ export default function FamilyGroup({
           whileTap={{ scale: 0.96 }}
           className="rounded-full border border-black/15 px-5 py-2 text-sm font-medium transition-colors hover:border-black/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-white/15 dark:hover:border-white/40"
         >
-          Show me more!
+          show me more!
         </motion.button>
       </div>
     </section>

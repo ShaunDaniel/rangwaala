@@ -14,16 +14,16 @@ export default function Navbar() {
             href="/explore"
             className="rounded-full border border-black/15 px-3 py-1.5 text-xs font-medium transition-colors hover:border-black/40 sm:text-sm dark:border-white/15 dark:hover:border-white/40"
           >
-            Explore
+            explore
           </Link>
 
           <p className="hidden text-xs sm:block sm:text-sm">
-            Made with <span className="text-red-500">♥</span> by{" "}
+            made with <span className="text-red-500">💝</span> by{" "}
             <a
               href="https://shaundaniel.work"
               className="underline transition-colors duration-200 hover:text-blue-500"
             >
-              Shaun
+              shaun
             </a>
           </p>
         </div>

@@ -7,7 +7,7 @@ import FamilyGroup from "@/components/FamilyGroup";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Explore palettes",
+  title: "explore palettes",
   description:
     "Ready-made palettes grouped by color family — blues, reds, magentas, and more. Click any to open it in the generator.",
 };
@@ -19,7 +19,7 @@ export default function ExplorePage() {
     <main className="mx-auto max-w-6xl px-5 py-10 md:px-8 md:py-14">
       <header className="mb-8">
         <h1 className="text-4xl font-extrabold tracking-tight md:text-6xl">
-          Explore palettes
+          explore palettes
         </h1>
         <p className="mt-3 max-w-xl text-base opacity-75 md:text-lg">
           fresh palettes generated every time you visit!
@@ -28,7 +28,7 @@ export default function ExplorePage() {
           href="/"
           className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-black/15 px-4 py-1.5 text-sm font-medium transition-colors hover:border-black/40 dark:border-white/15 dark:hover:border-white/40"
         >
-          ← Back
+          ← back
         </Link>
       </header>
 

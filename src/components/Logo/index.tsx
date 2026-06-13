@@ -17,7 +17,7 @@ export default function Logo() {
       style={{ fontFamily: "var(--font-anek), sans-serif", fontWeight: 800 }}
     >
       <span
-        className="bg-clip-text text-2xl leading-normal text-transparent transition-transform duration-300 group-hover:-translate-y-px sm:text-3xl"
+        className="relative top-[3px] bg-clip-text text-2xl leading-normal text-transparent transition-transform duration-300 group-hover:-translate-y-px sm:text-3xl"
         style={{
           backgroundImage:
             "linear-gradient(105deg,#fb7185 0%,#f59e0b 28%,#10b981 55%,#3b82f6 80%,#8b5cf6 100%)",
@@ -25,7 +25,7 @@ export default function Logo() {
       >
         रंग
       </span>
-      <span className="ml-0.5 text-2xl text-neutral-900 transition-transform duration-300 group-hover:translate-y-px sm:text-3xl dark:text-neutral-100">
+      <span className="ml-0.5 relative top-[2px] text-3xl text-neutral-900 transition-transform duration-300 group-hover:translate-y-px sm:text-4xl dark:text-neutral-100">
         waala
       </span>
     </Link>
