@@ -43,7 +43,7 @@ export default function ExplorePage() {
               >
                 <span
                   className="inline-block h-2.5 w-2.5 rounded-full"
-                  style={{ backgroundColor: `hsl(${family.hue} 70% 55%)` }}
+                  style={{ backgroundColor: family.swatch }}
                 />
                 {family.name}
               </a>

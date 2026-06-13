@@ -20,12 +20,12 @@ export async function generateMetadata({
   const ogUrl = `/og${ogQuery}`;
   const description = decoded
     ? `A color palette: ${decoded.colors
-        .map((c) => c.toUpperCase())
-        .join(", ")}.`
-    : "Generate, lock, and share beautiful color palettes — built around perceptual color and WCAG contrast.";
+      .map((c) => c.toUpperCase())
+      .join(", ")}.`
+    : "Generate, lock, and share beautiful color palettes.";
 
   return {
-    title: decoded ? "A shared palette · Rangwaala" : "Rangwaala — color palettes",
+    title: decoded ? "A shared palette · Rangwaala" : "Rangwaala - color palettes",
     description,
     openGraph: {
       title: "Rangwaala",
